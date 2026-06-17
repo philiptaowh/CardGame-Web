@@ -4,6 +4,7 @@ import { useGameStore } from '../stores/gameStore';
 import { useNetworkStore } from '../stores/networkStore';
 import { useReplayStore } from '../stores/replayStore';
 import { useToastStore } from '../stores/toastStore';
+import { useTestProgressStore } from '../stores/testProgressStore';
 import { exportReplayAsJSONL, uploadReplayToServer, flushPendingUploads } from '../services/replayExporter';
 import { isWebMode } from '../config/buildMode';
 import { PlayerArea } from './PlayerArea';
@@ -15,7 +16,7 @@ import { EnergyResultModal } from './EnergyResultModal';
 import { EnemyCard } from './EnemyCard';
 import { AIController } from './AIController';
 import { Layers, Trash2, LogOut, Power, HelpCircle, X, Swords, BookOpen, User, Info, Clock, ArrowLeft, Save, Loader2, CloudUpload } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { getAllCharacters } from '../game/characters';
 import { getSpecialCards } from '../game/cards';
 import { getAllMarks } from '../game/marks';
@@ -39,8 +40,37 @@ export function GameBoard({ onBack }: { onBack?: () => void }) {
   const showToast = useToastStore((s) => s.showToast);
   const [isSavingReplay, setIsSavingReplay] = useState(false);
 
-  // v2.2.1.2: 测试进度增量已迁移到 TestPage 监听 gameState.phase === 'game_over' 自动推送
-  // 不再在 GameBoard 的 handleSaveReplay 中重复 increment, 防止双重计数
+  // v2.2.1.4 FIX: matchup 计数监听器位置
+  // 原位置 TestPage 有 bug: setPage('game') 时 TestPage 被卸载, useEffect 失效
+  // 修法: 移到 GameBoard (游戏运行时唯一挂载的组件)
+  // 通过 isTestMode 区分 (只在 TestPage 起的对局才 increment)
+  const incrementMatchupAsync = useTestProgressStore((s) => s.incrementMatchupAsync);
+  const lastGameOverKeyRefForTest = useRef<string | null>(null);
+  useEffect(() => {
+    if (!isTestMode) return;
+    if (gameState.phase !== 'game_over') return;
+    if (gameState.players.length === 0) return;
+    const human = gameState.players.find((p) => p.type === 'human');
+    const ai = gameState.players.find((p) => p.type === 'ai');
+    if (!human || !ai) return;
+    const key = `${human.character_id}|${ai.character_id}`;
+    if (lastGameOverKeyRefForTest.current === key) return;
+    lastGameOverKeyRefForTest.current = key;
+    (async () => {
+      const result = await incrementMatchupAsync(human.character_id, ai.character_id);
+      if (result.ok) {
+        if (result.data.status === 'locked') {
+          showToast(`✅ ${key} 已收集满 10 局, matchup 已锁定!`, 'success');
+        } else {
+          showToast(`✅ matchup 进度 +1: ${key} ${result.data.completed}/${result.data.target}`, 'success');
+        }
+      } else if (result.code === 'LOCKED') {
+        showToast(`⚠️ ${key} 已被其他玩家锁定 (${result.error})`, 'info');
+      } else {
+        showToast(`matchup 进度同步失败: ${result.error}`, 'error');
+      }
+    })();
+  }, [isTestMode, gameState.phase, gameState.players, incrementMatchupAsync, showToast]);
 
   const [isQuitting, setIsQuitting] = useState(false);
   const [showExitModal, setShowExitModal] = useState(false);

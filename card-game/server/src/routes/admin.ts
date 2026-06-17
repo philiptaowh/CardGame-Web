@@ -32,13 +32,26 @@ function checkAdminAuth(req: Request, res: Response): boolean {
   return true;
 }
 
+/** 把 'YYYY-MM-DD' 格式补全为 'YYYY-MM-DD 00:00:00' (MySQL DATETIME 格式) */
+function toMysqlDateTimeStart(s: string): string {
+  return /^\d{4}-\d{2}-\d{2}$/.test(s) ? `${s} 00:00:00` : s;
+}
+function toMysqlDateTimeEnd(s: string): string {
+  return /^\d{4}-\d{2}-\d{2}$/.test(s) ? `${s} 23:59:59` : s;
+}
+
 // ============ GET /api/admin/replays ============
 
 adminRouter.get('/admin/replays', async (req, res) => {
   if (!checkAdminAuth(req, res)) return;
 
-  const since = (req.query.since as string) || '1970-01-01';
-  const until = (req.query.until as string) || '2099-12-31';
+  // 修复 mysql2 prepared statement DATETIME 兼容:
+  // 字符串 '2026-01-01' 直接传会触发 "Incorrect arguments to mysqld_stmt_execute"
+  // 解决: 补全时间部分, 或转 Date 对象
+  const sinceRaw = (req.query.since as string) || '1970-01-01';
+  const untilRaw = (req.query.until as string) || '2099-12-31';
+  const since = toMysqlDateTimeStart(sinceRaw);
+  const until = toMysqlDateTimeEnd(untilRaw);
   const limit = Math.min(Number(req.query.limit ?? 100) || 100, 10000);
   const offset = Math.max(Number(req.query.offset ?? 0) || 0, 0);
 
@@ -63,7 +76,7 @@ adminRouter.get('/admin/replays', async (req, res) => {
     );
 
     // payload 是 JSON 字符串, 保持原样返回 (客户端按需 JSON.parse)
-    const data = rows.map((r) => ({
+    const data = rows.map((r: any) => ({
       id: r.id,
       client_ip: r.client_ip,
       user_agent: r.user_agent,

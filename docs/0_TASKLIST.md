@@ -18,11 +18,13 @@
 ## 📝 任务池
 
 ### v1.0.0 Foundation — ✅ 已完成
+
 - 技术栈初始化（React + Vite + TypeScript + Tailwind + Zustand）
 - 游戏逻辑层 + UI 组件 + 交互流程（角色选择/三阶段/胜利界面）
 - 版本发布 v1.0.0
 
 ### v1.0.1 Bug Fixes & 测试体系 — ✅ 已完成
+
 - 印记系统修复 + 技能逻辑修复（卡牌克隆/混乱/睡眠等）
 - Vitest 测试体系（角色技能 × 9、跨回合 modifier 测试）
 - 行动状态框架裁定（extra_rule.md）+ Per-skill 计数器
@@ -30,6 +32,7 @@
 - Electron 桌面壳打包
 
 ### v1.1.0 多AI对战 — ✅ 已完成
+
 - 基础设施：类型扩展 + Store 改造 + 牌组耗尽规则
 - 开局换牌系统（CardExchange + AI 换牌）
 - 弹窗系统 1v1/1vN 统一
@@ -40,6 +43,7 @@
 - EXE 打包（release/ 84MB）+ Git 打标签
 
 ### v1.2.0 局域网联机模式 — ✅ 已完成
+
 - 封面页双入口 + 创建/加入房间 + 房间等待界面
 - WebSocket 通信层（服务端 server.cjs + 客户端 useWebSocket + 通信协议定义）
 - 同步阶段逻辑（角色选择/换牌/能量放置 + 游戏状态同步）
@@ -52,29 +56,37 @@
 
 ### v2.0.0 — 仿真引擎 + 规则AI基线（✅ 已完成）
 
-- [x] **Engine 重构** — GameEngine 可注入 PRNG（mulberry32）、确定性执行（所有 shuffle/random 通过 this.prng）、时间戳可配置、种子追踪
-- [x] **策略族实现** — IPlayerPolicy 接口 + RuleBasedAI（10 组预设：激进/保守/均衡/控场/爆发/消耗/贪婪/自保/赌徒/先手大师）+ RandomAI 基线
-- [x] **并发调度** — ConcurrentRunner 带并发池控制（Promise-based），36 组合 × n 局
-- [x] **数据采集管线** — JSON Lines 写入 + 完整性校验（数量/格式/逻辑/种子复现）
-- [x] **文本回放器** — CLI 回放工具（含 test 自测命令）
-- [x] **验收：** build + 可复现性测试（✅ PASS）+ 9 角色可独立配置出场
+- [X] **Engine 重构** — GameEngine 可注入 PRNG（mulberry32）、确定性执行（所有 shuffle/random 通过 this.prng）、时间戳可配置、种子追踪
+- [X] **策略族实现** — IPlayerPolicy 接口 + RuleBasedAI（10 组预设：激进/保守/均衡/控场/爆发/消耗/贪婪/自保/赌徒/先手大师）+ RandomAI 基线
+- [X] **并发调度** — ConcurrentRunner 带并发池控制（Promise-based），36 组合 × n 局
+- [X] **数据采集管线** — JSON Lines 写入 + 完整性校验（数量/格式/逻辑/种子复现）
+- [X] **文本回放器** — CLI 回放工具（含 test 自测命令）
+- [X] **验收：** build + 可复现性测试（✅ PASS）+ 9 角色可独立配置出场
 
 ### v2.1.0 — Meta分析 + 角色梯度（✅ 已完成）
 
 #### Phase 1 — Python 分析核心（✅ 已完成）
-- [x] **loader.py** — JSONL 加载，构建 9×9 胜率矩阵与对战记录数组
-- [x] **win_matrix.py** — Wilson 置信区间、Bootstrap CI（CPU）、Power Analysis
-- [x] **stats_tests.py** — 双比例 Z 检验、BH-FDR / Bonferroni 修正、Cohen's h 效应量
-- [x] **ratings.py** — Elo 评级（迭代收敛）、Glicko 评级（含 RD 更新）、Tier 划分（基于 CI 重叠+WinRate回退）
+
+- [X] **loader.py** — JSONL 加载，构建 9×9 胜率矩阵与对战记录数组
+- [X] **win_matrix.py** — Wilson 置信区间、Bootstrap CI（CPU）、Power Analysis
+- [X] **stats_tests.py** — 双比例 Z 检验、BH-FDR / Bonferroni 修正、Cohen's h 效应量
+- [X] **ratings.py** — Elo 评级（迭代收敛）、Glicko 评级（含 RD 更新）、Tier 划分（基于 CI 重叠+WinRate回退）
+
 #### Phase 2 — GPU 加速（✅ 已完成）
-- [x] **gpu_accel.py** — Numba CUDA Bootstrap 重采样 kernel（10000 线程并行），`--gpu` 开关自动选择 GPU/CPU，43560 局 × 10000 次重采样仅 1.2s
+
+- [X] **gpu_accel.py** — Numba CUDA Bootstrap 重采样 kernel（10000 线程并行），`--gpu` 开关自动选择 GPU/CPU，43560 局 × 10000 次重采样仅 1.2s
+
 #### Phase 3 — HTML 报告（✅ 已完成）
-- [x] **report.py** — 自包含 HTML 报告（785KB）：Tier 排名(CSS) + 热力图/柱状图/直方图(matplotlib base64) + 克制关系图(D3.js 力导向图内嵌) + 统计检验表 + 角色详情卡 + D3.js 缓存
+
+- [X] **report.py** — 自包含 HTML 报告（785KB）：Tier 排名(CSS) + 热力图/柱状图/直方图(matplotlib base64) + 克制关系图(D3.js 力导向图内嵌) + 统计检验表 + 角色详情卡 + D3.js 缓存
+
 #### Phase 4 — CLI 集成（✅ 已完成）
-- [x] **main.py** — Python CLI 入口，参数解析，管线编排
-- [x] **src/analysis/cli.ts** — TypeScript `analyze` 命令桥接 Python 子进程（pytorch_gpu），支持 `--gpu / --no-report / --max-games / --output`
+
+- [X] **main.py** — Python CLI 入口，参数解析，管线编排
+- [X] **src/analysis/cli.ts** — TypeScript `analyze` 命令桥接 Python 子进程（pytorch_gpu），支持 `--gpu / --no-report / --max-games / --output`
 
 #### Phase 5 — GPU 超参数优化（🔄 内容已移至 v2.1.5，见下）
+
 > 2026-06-09 决策：贝叶斯优化不再单独立项，并入"AI 智能水平强化"三阶段路径（v2.1.1 Phase 2）
 
 ### v2.1.1 — AI 智能水平强化（✅ Phase 2 BO 全角色已完成）
@@ -86,20 +98,21 @@
 
 为 Phase 2 BC 拟合准备数据采集管线。在 V1 客户端录制人 vs AI 对局，导出 JSONL。
 
-- [x] **replayStore.ts** — Zustand 独立 store + persist 中间件（localStorage 持久化）
-- [x] **settingsStore.ts** — 设置弹窗 UI 状态 + autoRecord 业务开关
-- [x] **replayExporter.ts** — Blob + a.click 浏览器下载
-- [x] **gameStore 录制 hooks** — 在 4 个 action（exchangeCard/placeEnergyCard/useSkill/useSpecialCard）+ executeAiAction + checkGameOver 注入 recordMove（仅 1v1 模式）
-- [x] **SettingsButton + SettingsModal** — 齿轮按钮 + 弹窗容器（ESC/外点/× 关闭）
-- [x] **3 个 Tab 组件** — RecordingTab（autoRecord 开关 + 录制状态）/ AiLevelTab（占位）/ AboutTab
-- [x] **GameBoard 胜利弹窗** — 加"保存录像"+"丢弃"按钮，保存时锁定弹窗+spinner+下载+Toast
-- [x] **Toast 通知系统** — toastStore + ToastContainer
-- [x] **P1.6 修复** — saveCurrentReplay 接受 winner/finalState overrides，UI 层从 gameState 计算填充
-- [x] **tsconfig.app.json 排除 simulator** — 修复 V2 pre-existing 类型错误，架构上 V1 不应检查 V2
-- [x] **tools/validate_replays.py** — Python 批量校验工具（CRITICAL = P1.6 修复前症状）
-- [x] **验收** — 录制 1 局 char_1 vs char_3，26 动作 7 回合，winner=player_1，finalState 完整
+- [X] **replayStore.ts** — Zustand 独立 store + persist 中间件（localStorage 持久化）
+- [X] **settingsStore.ts** — 设置弹窗 UI 状态 + autoRecord 业务开关
+- [X] **replayExporter.ts** — Blob + a.click 浏览器下载
+- [X] **gameStore 录制 hooks** — 在 4 个 action（exchangeCard/placeEnergyCard/useSkill/useSpecialCard）+ executeAiAction + checkGameOver 注入 recordMove（仅 1v1 模式）
+- [X] **SettingsButton + SettingsModal** — 齿轮按钮 + 弹窗容器（ESC/外点/× 关闭）
+- [X] **3 个 Tab 组件** — RecordingTab（autoRecord 开关 + 录制状态）/ AiLevelTab（占位）/ AboutTab
+- [X] **GameBoard 胜利弹窗** — 加"保存录像"+"丢弃"按钮，保存时锁定弹窗+spinner+下载+Toast
+- [X] **Toast 通知系统** — toastStore + ToastContainer
+- [X] **P1.6 修复** — saveCurrentReplay 接受 winner/finalState overrides，UI 层从 gameState 计算填充
+- [X] **tsconfig.app.json 排除 simulator** — 修复 V2 pre-existing 类型错误，架构上 V1 不应检查 V2
+- [X] **tools/validate_replays.py** — Python 批量校验工具（CRITICAL = P1.6 修复前症状）
+- [X] **验收** — 录制 1 局 char_1 vs char_3，26 动作 7 回合，winner=player_1，finalState 完整
 
 **2026-06-11 关键决策**：
+
 - 录制状态独立 store：避免污染 gameStore，避免触发游戏重渲染
 - localStorage 持久化：savedReplays 跨会话保留
 - autoRecord 替代 armed 状态：业务开关（用户偏好）vs 单次临时意图
@@ -107,24 +120,27 @@
 - V1 单人模式不调 checkGameOver：UI 层（GameBoard）需从 gameState 自己推算 winner
 
 **AC（验收标准）**：
+
 - 录制的 JSONL 文件能被 tools/validate_replays.py 0 errors 通过
 - winner 非 null，finalState.players 包含所有终局状态
 - 关闭浏览器后 savedReplays 仍可恢复
 
 #### Phase 2 — 贝叶斯超参优化（✅ BO 管线 + GPU 全 9 角色已全部完成）
-- [x] **optimizer_interface.py** — 抽象 BaseOptimizer，支持 skopt/Optuna/BoTorch 切换
-- [x] **optimizer_skopt.py** — skopt.gp_minimize 包装（5 维搜索空间：priority/hp_danger/aggro/mark_weight/special_threshold）
-- [x] **optimizer_botorch.py** — BoTorch 8 维 GPU 优化（cpu→cuda 自动切换），新增 wild/skill_pref/noise 维度
-- [x] **evaluate_theta.py** — Python spawn Node 跑 54 局/评估
-- [x] **evaluate-theta.cjs** — Node 单 θ 评估（spawn 6 策略 × 9 角色 = 54 局）
-- [x] **bo_runner.py** — 主循环 + 收敛检测（连续 20 轮无改善早停）
-- [x] **optimization/cli.ts** — TS CLI 入口（optimize/optimize-all）
-- [x] **report_bo.py** — 报告生成器（ASCII 文本 + matplotlib 可选）
-- [x] **end-to-end 验证** — char_9 budget=50 跑通：21 评估后早停，best_winrate=0.2778
-- [x] **char_9 8D 验证** — BoTorch 30 评估早停，best_winrate=0.3333（+5.5% 优于 5D 的 0.2778）
-- [x] **全 9 角色 BO 优化** — `run_all_bo.py` 串行 9 角色 × budget 100 × BoTorch 8D，503s 全部完成（2026-06-10 10:57→11:05）
-- [x] **verify_fix 验证** — char_7 (0.2593) 和 char_9 (0.3333) 全 budget 100 验证通过（`data/optimization/verify_fix/`）
-- [x] **干净 batch 收集** — 20160 局（45 pairs × 8 policies × 4 seeds）P0 修复后基线（`data/raw/2026-06-10_clean-batch.jsonl`）
+
+- [X] **optimizer_interface.py** — 抽象 BaseOptimizer，支持 skopt/Optuna/BoTorch 切换
+- [X] **optimizer_skopt.py** — skopt.gp_minimize 包装（5 维搜索空间：priority/hp_danger/aggro/mark_weight/special_threshold）
+- [X] **optimizer_botorch.py** — BoTorch 8 维 GPU 优化（cpu→cuda 自动切换），新增 wild/skill_pref/noise 维度
+- [X] **evaluate_theta.py** — Python spawn Node 跑 54 局/评估
+- [X] **evaluate-theta.cjs** — Node 单 θ 评估（spawn 6 策略 × 9 角色 = 54 局）
+- [X] **bo_runner.py** — 主循环 + 收敛检测（连续 20 轮无改善早停）
+- [X] **optimization/cli.ts** — TS CLI 入口（optimize/optimize-all）
+- [X] **report_bo.py** — 报告生成器（ASCII 文本 + matplotlib 可选）
+- [X] **end-to-end 验证** — char_9 budget=50 跑通：21 评估后早停，best_winrate=0.2778
+- [X] **char_9 8D 验证** — BoTorch 30 评估早停，best_winrate=0.3333（+5.5% 优于 5D 的 0.2778）
+- [X] **全 9 角色 BO 优化** — `run_all_bo.py` 串行 9 角色 × budget 100 × BoTorch 8D，503s 全部完成（2026-06-10 10:57→11:05）
+- [X] **verify_fix 验证** — char_7 (0.2593) 和 char_9 (0.3333) 全 budget 100 验证通过（`data/optimization/verify_fix/`）
+- [X] **干净 batch 收集** — 20160 局（45 pairs × 8 policies × 4 seeds）P0 修复后基线（`data/raw/2026-06-10_clean-batch.jsonl`）
+
 - **2026-06-10 关键发现**：
   - 全角色 BO 最优胜率汇总：char_1=62.0% / char_2=54.6% / char_3=82.4% / char_4=84.3% / char_5=55.6% / char_6=94.4% / char_7=25.9% / char_8=57.4% / char_9=33.3%
   - char_9 BO best 0.3333（balanced 默认 ~0.25）→ +8.3% 提升
@@ -133,36 +149,42 @@
   - char_9 与 char_7 属于弱势角色，BO 优化提升有限，需 DL/RL 验证是否 AI 策略瓶颈还是角色设计问题
 
 #### Phase 1 — 修 RuleBasedAI 死循环（🔴 阻塞性前置）
-- [x] **ruleBasedAI.ts 死循环修复** — c0 占比 41-82% 的根因消除；新增"无进展检测"和"重复动作检测"；保持接口与 PRD 行为不变
+
+- [X] **ruleBasedAI.ts 死循环修复** — c0 占比 41-82% 的根因消除；新增"无进展检测"和"重复动作检测"；保持接口与 PRD 行为不变
   - **2026-06-09 修复方案（v2.1.1 方案 B：不限速 + 情景式评分）**：
     - 收紧 `scoreSpecialCard`（case 1/5/6/8-12/13/16 评分下调）
     - `decidePhase2` 加 `bestScore > 0` 早退门槛
     - 新增 `lastActionThisTurn` 字段 + 重复 cardIndex 检测（防 c0 类死循环兜底）
-- [x] **10 局审查样本回归** — 重跑 M0+M1-M9，**修订 AC**：原 "c0 占比 < 15%" 是症状不是根因；新 AC = 特殊卡 < 30 + 总动作 < 250 + 回合均动 < 15。**全 10/10 通过**（special 4-14, total 94-219, m/t 7-10）
-- [x] **144 局统计稳定性测试** — 36 unordered matchup × 4 policy 组合。**全部指标达标**（special max=29, total max=237, 无死循环），144 局 3.33s。**详见 `data/raw/manual-review/2026-06-09_batch-144.jsonl`**
-- [x] **20160 局干净 batch 收集** — P0 修复后首次大批次基线（详见 §Phase 2 描述）
-- [x] **沉淀到 0_TASKLIST.md 自我进化循环沉淀** — 未来铁律15 写入
+- [X] **10 局审查样本回归** — 重跑 M0+M1-M9，**修订 AC**：原 "c0 占比 < 15%" 是症状不是根因；新 AC = 特殊卡 < 30 + 总动作 < 250 + 回合均动 < 15。**全 10/10 通过**（special 4-14, total 94-219, m/t 7-10）
+- [X] **144 局统计稳定性测试** — 36 unordered matchup × 4 policy 组合。**全部指标达标**（special max=29, total max=237, 无死循环），144 局 3.33s。**详见 `data/raw/manual-review/2026-06-09_batch-144.jsonl`**
+- [X] **20160 局干净 batch 收集** — P0 修复后首次大批次基线（详见 §Phase 2 描述）
+- [X] **沉淀到 0_TASKLIST.md 自我进化循环沉淀** — 未来铁律15 写入
 
 #### Phase 2 — 后续验证（BO 实施已完成，待大规模验收）
+
 > 注：以下 3 项已在实施阶段完成：`optimizer_botorch.py`（8D GPU）+ `bo_runner.py`（目标函数 + 早停收敛判据）
-- [x] **optimizer.py（已实现为 optimizer_botorch.py）** — BoTorch 8 维 GPU 优化，支持 wild/skill_pref/noise 维度
-- [x] **目标函数设计（已实现于 bo_runner.py）** — 混合对手池 {balanced, gambler, conservative, aggressive, saver, all-round} 上平均胜率
-- [x] **收敛判据（已实现于 bo_runner.py）** — GP 后验方差稳定 + 连续 N 轮无改善早停（默认 patience=20, tol=0.005）
+
+- [X] **optimizer.py（已实现为 optimizer_botorch.py）** — BoTorch 8 维 GPU 优化，支持 wild/skill_pref/noise 维度
+- [X] **目标函数设计（已实现于 bo_runner.py）** — 混合对手池 {balanced, gambler, conservative, aggressive, saver, all-round} 上平均胜率
+- [X] **收敛判据（已实现于 bo_runner.py）** — GP 后验方差稳定 + 连续 N 轮无改善早停（默认 patience=20, tol=0.005）
 - [ ] **大规模验收** — 使用 BO 优化后的 θ* 重跑 batch-579（43560 局），验证 char_7/char_9 胜率改善是否统计显著；生成含对比的新 HTML 报告
 
 #### Phase 3 — DL/RL 策略基线（与 Phase 2 对比）
+
 - [ ] **环境封装** — GameEngine → PettingZoo 多智能体环境
 - [ ] **PPO 基线** — Stable-Baselines3 / RLlib 训练 9 角色独立策略
 - [ ] **消融实验** — 卡牌游戏2.0原型.md §5.5 框架
 - [ ] **与 BO 对比报告** — 哪种方法在 9 角色上效果更优
 
 #### 技术债务 — Glicko 改进
+
 - [ ] **Glicko 收敛加速** — 当前 Glicko 在独立仿真对局（非时间序列）中排序不稳定。改进方向：（1）随机打乱对局顺序多次运行取平均；（2）引入 mini-batch 更新减少方差；（3）对比分析使用 Elo 作为主评级，Glicko 仅作参考
 
 ### v2.2.0 — 混合强度分析（🔭 远期，依赖 v2.1.1 大规模验收完成）
 
 > 注：全角色 θ 优化已在 v2.1.1 Phase 2 完成（9 角色 × BoTorch 8D × budget 100），θ* 矩阵已构建
-- [x] **全角色 θ 优化** — 9 角色独立超参数优化已全部完成（`data/optimization/all_chars_20260610_105706.summary.json`）
+
+- [X] **全角色 θ 优化** — 9 角色独立超参数优化已全部完成（`data/optimization/all_chars_20260610_105706.summary.json`）
 - [ ] **双强度管线** — 分别跑方案A（通用强度)和方案C（有效强度），输出对比报告
 - [ ] **操作天花板分析** — 自动计算 Δ(c_i) = R_effective - R_base 及其 Bootstrap 置信区间
 
@@ -174,6 +196,7 @@
 > **决策**：仅 V2 BO 屏蔽 char_7，网页版不限制（玩家可自由选 9 角色）。
 
 #### Phase 1 — V1 网页模式开关（🛠 进行中）
+
 - [ ] **P1.1 buildMode 配置模块** — `src/config/buildMode.ts` 提供 `isWebMode()` / `API_BASE`
 - [ ] **P1.2 vite.config.ts + build:web 脚本** — 加 web 模式 build/dev 脚本
 - [ ] **P1.3 CoverPage 隐藏 LAN/Test 入口** — web 模式仅保留人机对战
@@ -184,12 +207,14 @@
 - [ ] **P1.8 build 验证** — `npm run build` + `npm run build:web` 双模式零错误
 
 **AC（验收）**：
+
 - `npm run build:web` 产物可静态部署到 Nginx/OSS
 - web 模式运行时，CoverPage 看不到「局域网联机」「录制测试」入口
 - 玩 1 局 1v1，胜利时录像自动 POST `/api/replays`，无需用户手动操作
 - 关闭网络（offline）玩 1 局，胜利后录像入 `pendingUploads`，恢复网络后启动时自动补传
 
 #### Phase 2 — 后端服务（📅 待启动）
+
 - [ ] **P2.1 server 目录初始化** — `card-game/server/` 新建 package.json / tsconfig / .env.example / README
 - [ ] **P2.2 schema.sql + db.ts** — MySQL 8.0 replays 表 DDL + 连接池 + 启动自动初始化
 - [ ] **P2.3 路由实现** — POST /api/replays / GET /api/replays/stats / GET /api/health
@@ -198,20 +223,23 @@
 - [ ] **P2.6 V1+server 联调** — Vite web 模式 dev + 本地 Node server，跑 1 局验证上传
 
 **AC**：
+
 - `cd server && npm run dev` 启动后 `curl http://localhost:3000/api/health` 返回 `{status:'ok',db:'connected',count:N}`
 - V1 web 模式一局结束后，replay 自动出现在 MySQL `replays` 表，`payload` 字段含完整 V1Replay JSON
 - `GET /api/replays/stats` 返回按 `char_ai × winner` 聚合的胜率
 
 #### Phase 3 — char_7 屏蔽 + 8 角色大规模验收（📅 下一轮）
+
 - [ ] **P3.1 BO 跳过 char_7** — `data/optimization/run_all_bo.py` / `bo_runner.py` 排除 char_7
 - [ ] **P3.2 simulator/cli.ts / analysis/cli.ts** — 加 `--exclude-chars` 参数
 - [ ] **P3.3 大规模验收改 8 角色对照** — 重跑 batch（char_7 留待角色修改后补做）
 - [ ] **P3.4 0_TASKLIST.md 大规模验收 AC 改写** — "8 角色对照实验"
 
 #### Phase 4 — 部署准备（✅ 2026-06-15 完成）
-- [x] **P4.1 隐私政策页 / 用户协议页** — V1 加路由 + 强制勾选（国内合规最低要求）
-- [x] **P4.2 阿里云部署文档** — DEPLOY.md：域名注册、ICP 备案、ECS、Nginx、SSL、MySQL
-- [x] **P4.3 域名/备案/SSL 流程清单** — 时间线 + 卡点提示（备案 7-20 工作日）
+
+- [X] **P4.1 隐私政策页 / 用户协议页** — V1 加路由 + 强制勾选（国内合规最低要求）
+- [X] **P4.2 阿里云部署文档** — DEPLOY.md：域名注册、ICP 备案、ECS、Nginx、SSL、MySQL
+- [X] **P4.3 域名/备案/SSL 流程清单** — 时间线 + 卡点提示（备案 7-20 工作日）
 
 ### v2.2.1 — 角色平衡调整（🛠 进行中，2026-06-15）
 
@@ -219,16 +247,17 @@
 > 原型变更原因：V2.1.1 BO 数据显示 char_7 1v1 胜率仅 25.9% 过弱，char_2/6/8 也需小幅修正。
 > 本版本专注 V1 代码同步；V2 BO 屏蔽 char_7 计划**等 V1 验证通过后解除**。
 
-- [x] **P1 characters.ts 同步** — 4 角色描述文本 + 弱化 4 技能命名（削弱/衰弱/虚弱/朽灭）
-- [x] **P2 gameEngine 防御 技能4** — 触发条件 `hand===0` → `hand<=2`
-- [x] **P3 gameEngine 持久 技能4** — 弱化 1 回合 → 流血 3 回合；回复 8 → turn/2
-- [x] **P4 gameEngine 反击 技能4** — 条件翻转（已受伤→未受伤）+ 自损 4 + 目标 4
-- [x] **P5 gameEngine 弱化 4 技能重写** — 全 4 技能按新原型重做
-- [x] **P6 4 套技能测试更新** — char_2/6/7/8 测试套件
-- [x] **P7 3 个协同/集成测试新增** — char_7 stacking 协同 / char_8 自损影响技能1-3 / char_5 完整 action order + 敌方睡眠
-- [x] **P8 build + 70+ tests PASS**
+- [X] **P1 characters.ts 同步** — 4 角色描述文本 + 弱化 4 技能命名（削弱/衰弱/虚弱/朽灭）
+- [X] **P2 gameEngine 防御 技能4** — 触发条件 `hand===0` → `hand<=2`
+- [X] **P3 gameEngine 持久 技能4** — 弱化 1 回合 → 流血 3 回合；回复 8 → turn/2
+- [X] **P4 gameEngine 反击 技能4** — 条件翻转（已受伤→未受伤）+ 自损 4 + 目标 4
+- [X] **P5 gameEngine 弱化 4 技能重写** — 全 4 技能按新原型重做
+- [X] **P6 4 套技能测试更新** — char_2/6/7/8 测试套件
+- [X] **P7 3 个协同/集成测试新增** — char_7 stacking 协同 / char_8 自损影响技能1-3 / char_5 完整 action order + 敌方睡眠
+- [X] **P8 build + 70+ tests PASS**
 
 **AC（验收）**：
+
 - `npm run build` 零类型错误
 - `npm run test:run` ≥ 72/72 tests passed（原 69 + 新 3）
 - char_7 4 技能按新原型实现（削弱/衰弱/虚弱/朽灭）
@@ -236,12 +265,14 @@
 - char_5 睡眠场景已通过既有 3 个 sleep 测试
 
 **依赖关系**：
+
 - ✅ V1 验证通过后 → 下一轮解除 V2 BO 对 char_7 的屏蔽（V2.2.1 → V2.1.1 phase 2 大规模验收）
 
 ### v2.2.1.2 — Web 测试页 + 共享进度（🛠 进行中，2026-06-15）
 
 > **背景**：v2.2.1.1 V1 角色修复 + 隐私弹窗 z-index 修复后，启动 V2 char_7 解锁并改造测试页。
 > **设计**：
+>
 > - Web 模式 CoverPage 只保留 1 个按钮（"录制测试"），无其他入口
 > - TestPage 列出 81 种 matchup（9 人类 × 9 AI）+ 当前进度
 > - 每种 matchup 目标 10 局；收集满后**自动锁定**，无法被选（含随机）
@@ -250,19 +281,20 @@
 > - Race condition：9/10 时两用户同时+1，第二个返回 409 Conflict
 > - 数据迁移：旧 localStorage 首次访问弹窗"合并到服务器（取 max）"
 
-- [x] **P1 0_TASKLIST 任务块**
-- [x] **P2 BE.1 schema.sql 加 test_progress 表**
-- [x] **P3 BE.2 test-progress 路由 (含锁定校验)**
-- [x] **P4 BE.3 server smoke 测试**
-- [x] **P5 FE.1 testProgressStore 改造 (server 同步 + 5s 轮询)**
-- [x] **P6 FE.2 CoverPage web 模式改单按钮**
-- [x] **P7 FE.3 TestPage 重构 (10 格进度 + 锁定 + 随机)**
-- [x] **P8 FE.4 1 局玩完后 increment 路径**
-- [x] **P9 FE.5 5s 轮询 + 同步指示器**
-- [x] **P10 FE.6 localStorage 迁移弹窗**
-- [x] **P11 验证 (server + client + 76+ tests) PASS**
+- [X] **P1 0_TASKLIST 任务块**
+- [X] **P2 BE.1 schema.sql 加 test_progress 表**
+- [X] **P3 BE.2 test-progress 路由 (含锁定校验)**
+- [X] **P4 BE.3 server smoke 测试**
+- [X] **P5 FE.1 testProgressStore 改造 (server 同步 + 5s 轮询)**
+- [X] **P6 FE.2 CoverPage web 模式改单按钮**
+- [X] **P7 FE.3 TestPage 重构 (10 格进度 + 锁定 + 随机)**
+- [X] **P8 FE.4 1 局玩完后 increment 路径**
+- [X] **P9 FE.5 5s 轮询 + 同步指示器**
+- [X] **P10 FE.6 localStorage 迁移弹窗**
+- [X] **P11 验证 (server + client + 76+ tests) PASS**
 
 **AC（验收）**：
+
 - Web 模式 CoverPage 1 个按钮
 - TestPage 列表 81 项，每项 10 格进度方块
 - 10/10 matchup 锁定（灰显 + 不可点 + 随机跳过）
@@ -275,71 +307,6 @@
 
 > **2026-06-15 决策撤销**：老师推荐的 Cloudflare 方案经分析存在架构冲突（Workers 重写 Express 整盘代码、域名延迟、D1 vs MySQL 迁移等），**改回阿里云路径**。
 > 详见 `docs/DEPLOY.md`（v2.2.0-alpha Phase 4 写好的完整 12 章节阿里云部署文档，原方案保留并生效）。
-
-### v2.2.1.4 — 阿里云 ACL3 部署 + 录像下载（✅ 2026-06-17 完成）
-
-> **背景**：域名 + 阿里云 ECS（Alibaba Cloud Linux 3.2104 LTS 64位）已购，ICP 备案已通过，部署进入实施阶段。
-> **决策汇总**：
-> - MySQL 选型：MySQL 8.0（加 MySQL 官方 YUM 源）
-> - SELinux：禁用（setenforce 0 + /etc/selinux/config 永久 disabled）
-> - SSH 用户：deploy 用户 + sudo
-> - 范围：D — 全部（DEPLOY.md 修订 + 部署脚本 + admin API + 拉取脚本）
-> - **结论**：v2.2.1.4 完全在阿里云生态内完成，**代码本身零改动**（Vite SPA + Node + Express + MySQL 全部跨平台）
-
-- [x] **P1 DEPLOY.md 修订 (ACL3 适配)**
-  - 全文改用 `dnf`（替代 `yum`）
-  - §5.1 MySQL 8.0 加 MySQL 官方 YUM 源（mysql80-community-release-el8-9）
-  - §3.2 新增「禁用 SELinux」步骤（避免 nginx → Node 反代被阻止）
-  - §3.2 新增「firewalld 端口开放」步骤（22/80/443）
-  - §5.2 .env 新增 `ADMIN_TOKEN=...`（openssl rand -hex 32）
-  - §13 新增「录像数据下载到本机」章节（mysqldump / admin API / DMS 三种方式对比）
-  - §14 新增「自动化部署」章节（setup-server.sh / deploy-prod.sh / backup-mysql.sh / pull_replays.cjs）
-- [x] **P2 scripts/setup-server.sh 首次部署脚本**
-  - 9 阶段：前置检查 → 收集配置 → dnf update → 创建 deploy 用户 → 禁用 SELinux → firewalld → MySQL 8.0 → Node 20 → nginx → git clone + build → .env + systemd + nginx
-  - 交互式输入：域名 / MySQL root 密码 / MySQL app 密码 / Git 仓库 / 部署分支
-  - 自动生成 ADMIN_TOKEN（openssl rand -hex 32）并写入 .env
-- [x] **P3 scripts/deploy-prod.sh 后续更新脚本**
-  - 本地一行 `bash scripts/deploy-prod.sh` 即可全量更新
-  - 5 阶段：git pull → npm run build:web → cp dist → restart systemd → 端到端验证
-  - 验证：health check + HTTPS 200
-- [x] **P4 scripts/backup-mysql.sh 每日备份**
-  - crontab: `0 3 * * * /path/to/backup-mysql.sh`
-  - mysqldump → gzip → /backup/card-game-YYYYMMDD.sql.gz
-  - 保留 7 天，删旧的
-  - 可选：rsync 同步到本机（SYNC_TO_LOCAL env）
-- [x] **P5 server admin API + smoke**
-  - `GET /api/admin/replays?since=&until=&limit=&offset=` （X-Admin-Token 鉴权）
-  - `GET /api/admin/stats` （自检, 按 char_ai × winner 聚合）
-  - limit 上限 10000, offset clamp 0
-  - payload JSON 字符串保持原样返回
-  - admin.test.ts 11 个 smoke tests PASS
-- [x] **P6 tools/pull_replays.cjs 拉取脚本**
-  - 30 行 Node 脚本，零依赖
-  - 支持分页（自动遍历 total）
-  - 输出 V1Replay JSONL（V2 仿真直接消费）
-  - `--help` 输出完整用法
-- [x] **P7 验证 (server + client)**
-  - server: 28/28 smoke tests PASS (8 validation + 9 test-progress + 11 admin)
-  - client: 76/76 tests PASS
-  - `node tools/pull_replays.cjs --help` 输出正确
-  - server tsc 零错误
-
-**AC（验收）**：
-- `docs/DEPLOY.md` 包含完整 14 章节（新增 2 章：录像下载 + 自动化部署）
-- `scripts/setup-server.sh` 包含 9 阶段部署，可一键执行
-- `scripts/deploy-prod.sh` 后续一行更新
-- admin API 鉴权正确（11/11 smoke tests）
-- 拉取脚本输出 V1Replay JSONL
-- 本轮**零源代码改动**（保持 V1/V2 兼容）
-
-**下一步（待用户在服务器执行）**：
-1. 上传 `setup-server.sh` 到服务器 `/tmp/`
-2. `ssh root@ECS-IP "bash /tmp/setup-server.sh"` 按提示输入
-3. 上传 SSL 证书到 `/etc/nginx/ssl/`
-4. 编辑 nginx 配置启用 HTTPS
-5. 在阿里云域名控制台加 A 记录
-6. 浏览器访问 `https://<域名>` 试玩一局
-7. 本机 `node tools/pull_replays.cjs 2026-06-01 2099-12-31 ./downloads/test.jsonl`
 
 ---
 
@@ -383,11 +350,13 @@
 ## 🛠️ 验证命令
 
 ### V1 产品
+
 ```bash
 cd card-game && npm run dev
 ```
 
 ### V2 仿真平台
+
 ```bash
 cd card-game
 npx tsc -p tsconfig.simulator.json     # 编译仿真模块
@@ -399,24 +368,24 @@ node dist-engine/simulator/cli.js               # 命令行单局对局
 
 ## 📌 技术决策记录
 
-| 版本  | 决策                          | 原因                                                                                                             |
-| ----- | ----------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| 1.0.0 | React + Vite SPA 方案         | 轻量、开发快、便于未来扩展联机                                                                                   |
-| 1.0.0 | TypeScript 重写游戏逻辑       | 前端需实时响应游戏状态                                                                                           |
-| 1.0.0 | Tailwind CSS                  | 简约现代风 + 桌游沉浸感                                                                                          |
-| 1.0.0 | Zustand 状态管理              | 轻量、支持 2-4 玩家扩展                                                                                          |
-| 1.0.1 | 卡牌克隆漏洞修复              | stale gameState 引用导致 deck 回滚、特殊卡被复制。铁律：最终 set() 必须用 get() 重新读取最新 state               |
-| 1.0.1 | 技能效果与印记操作规范        | if/else 结构致印记刷新失败 + Object.assign 全量同步覆盖 HP/盾。铁律：印记始终调用 addMarkWithReplacement；多步累积只同步 hand |
-| 1.0.1 | 状态效果触发点设计            | 混乱检查后未重建 target + 睡眠仅在 useSkill 检查。铁律：状态效果在阶段入口处理，混乱后立即重建目标              |
-| 1.0.1 | 行动状态框架裁定              | 多人模式"先手"边界裁定。advancePhase 退出阶段2标记 has_acted_this_turn，睡眠跳过例外。详见 extra_rule.md        |
-| 1.0.1 | Per-skill 使用次数追踪        | 全局 skills_used_this_turn 致技能间互相拦截。新增 skill_usage_counts[] 独立计数每个技能                          |
-| 1.1.0 | AIController + 动态AI架构     | AI 行动逻辑从 UI 渲染解耦为独立控制器，支持 1-3 AI 灵活配置。铁律8/9/11                                    |
-| 1.2.0 | 服务端权威架构                | 无头 GameEngine 抽取 + GameHost 仲裁 + 同步计时器/时间银行由服务端统一驱动。铁律13                           |
-| 1.2.0 | 模块级 WebSocket 单例         | 组件间独立连接导致断线风暴，改为模块级单例 + handler 替换。铁律14                                            |
-| 1.2.0 | 房间生命周期管理              | 五态状态机(IDLE→LOBBY→PLAYING→ENDED→CLEAR) + 30s断线重连/房主转移                                         |
-| 2.0.0 | GameEngine PRNG 注入          | 所有随机操作通过可注入 PRNG（mulberry32），V1 默认 Math.random 零影响。铁律：新随机操作必须通过 this.prng     |
-| 2.0.0 | V1/V2 引擎同源策略            | V2 不 fork 引擎，通过构造参数 `GameEngineConfig` 切换模式，确保仿真结果反映实际游戏行为                       |
-| 2.0.0 | IPlayerPolicy 策略体系        | 策略与引擎分离，通过 Action 协议通信。策略必须实现 setPRNG 确保决策可复现。铁律：policy.decide 不直接调用引擎  |
+| 版本  | 决策                      | 原因                                                                                                                          |
+| ----- | ------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| 1.0.0 | React + Vite SPA 方案     | 轻量、开发快、便于未来扩展联机                                                                                                |
+| 1.0.0 | TypeScript 重写游戏逻辑   | 前端需实时响应游戏状态                                                                                                        |
+| 1.0.0 | Tailwind CSS              | 简约现代风 + 桌游沉浸感                                                                                                       |
+| 1.0.0 | Zustand 状态管理          | 轻量、支持 2-4 玩家扩展                                                                                                       |
+| 1.0.1 | 卡牌克隆漏洞修复          | stale gameState 引用导致 deck 回滚、特殊卡被复制。铁律：最终 set() 必须用 get() 重新读取最新 state                            |
+| 1.0.1 | 技能效果与印记操作规范    | if/else 结构致印记刷新失败 + Object.assign 全量同步覆盖 HP/盾。铁律：印记始终调用 addMarkWithReplacement；多步累积只同步 hand |
+| 1.0.1 | 状态效果触发点设计        | 混乱检查后未重建 target + 睡眠仅在 useSkill 检查。铁律：状态效果在阶段入口处理，混乱后立即重建目标                            |
+| 1.0.1 | 行动状态框架裁定          | 多人模式"先手"边界裁定。advancePhase 退出阶段2标记 has_acted_this_turn，睡眠跳过例外。详见 extra_rule.md                      |
+| 1.0.1 | Per-skill 使用次数追踪    | 全局 skills_used_this_turn 致技能间互相拦截。新增 skill_usage_counts[] 独立计数每个技能                                       |
+| 1.1.0 | AIController + 动态AI架构 | AI 行动逻辑从 UI 渲染解耦为独立控制器，支持 1-3 AI 灵活配置。铁律8/9/11                                                       |
+| 1.2.0 | 服务端权威架构            | 无头 GameEngine 抽取 + GameHost 仲裁 + 同步计时器/时间银行由服务端统一驱动。铁律13                                            |
+| 1.2.0 | 模块级 WebSocket 单例     | 组件间独立连接导致断线风暴，改为模块级单例 + handler 替换。铁律14                                                             |
+| 1.2.0 | 房间生命周期管理          | 五态状态机(IDLE→LOBBY→PLAYING→ENDED→CLEAR) + 30s断线重连/房主转移                                                         |
+| 2.0.0 | GameEngine PRNG 注入      | 所有随机操作通过可注入 PRNG（mulberry32），V1 默认 Math.random 零影响。铁律：新随机操作必须通过 this.prng                     |
+| 2.0.0 | V1/V2 引擎同源策略        | V2 不 fork 引擎，通过构造参数 `GameEngineConfig` 切换模式，确保仿真结果反映实际游戏行为                                     |
+| 2.0.0 | IPlayerPolicy 策略体系    | 策略与引擎分离，通过 Action 协议通信。策略必须实现 setPRNG 确保决策可复现。铁律：policy.decide 不直接调用引擎                 |
 
 ---
 
