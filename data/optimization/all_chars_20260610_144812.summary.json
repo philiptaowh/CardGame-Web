@@ -1,0 +1,191 @@
+{
+  "config": {
+    "library": "botorch",
+    "dim_8": true,
+    "budget": 100,
+    "n_initial": 25
+  },
+  "summaries": [
+    {
+      "char": "char_1",
+      "best_params": {
+        "priority": 0.24009652591617026,
+        "hp_danger": 0.24865637718124206,
+        "aggro": 0.5738443473698451,
+        "mark_weight": 0.5525352917391115,
+        "special_threshold": 0.40305280010221045,
+        "wild": "bal",
+        "skill_pref_0": 0.7845218499756547,
+        "skill_pref_1": 0.6872420375766887,
+        "skill_pref_2": 0.6950784965081013,
+        "skill_pref_3": 0.496866519596742,
+        "noise": 0.1950722254068276
+      },
+      "best_winrate": 0.592593,
+      "total_evals": 28,
+      "early_stopped": true,
+      "total_wallclock_s": 32.836280822753906
+    },
+    {
+      "char": "char_2",
+      "best_params": {
+        "priority": 0.24547530499443437,
+        "hp_danger": 0.2553914032247559,
+        "aggro": 0.7855357948629897,
+        "mark_weight": 0.12569642624266564,
+        "special_threshold": 0.8057856289057646,
+        "wild": "keep",
+        "skill_pref_0": 0.025254701045119066,
+        "skill_pref_1": 0.34806654199858034,
+        "skill_pref_2": 0.4876795075852356,
+        "skill_pref_3": 0.38947114312319087,
+        "noise": 0.07283400743771633
+      },
+      "best_winrate": 0.648148,
+      "total_evals": 27,
+      "early_stopped": true,
+      "total_wallclock_s": 39.98144888877869
+    },
+    {
+      "char": "char_3",
+      "best_params": {
+        "priority": 0.5992178074262863,
+        "hp_danger": 0.4571809915183581,
+        "aggro": 0.5511696467216657,
+        "mark_weight": 0.16468800465586275,
+        "special_threshold": 0.7334957971933564,
+        "wild": "keep",
+        "skill_pref_0": 0.7782573650932987,
+        "skill_pref_1": 0.5487995108337037,
+        "skill_pref_2": 0.8457938076672857,
+        "skill_pref_3": 0.07643923294898458,
+        "noise": 0.007709193936789061
+      },
+      "best_winrate": 0.833333,
+      "total_evals": 26,
+      "early_stopped": true,
+      "total_wallclock_s": 19.4698326587677
+    },
+    {
+      "char": "char_4",
+      "best_params": {
+        "priority": 0.06305228400974083,
+        "hp_danger": 0.31372682932988627,
+        "aggro": 0.7406907688419746,
+        "mark_weight": 0.9867633043040291,
+        "special_threshold": 0.3133776211149184,
+        "wild": "bal",
+        "skill_pref_0": 0.49986056246451527,
+        "skill_pref_1": 0.24871014120104762,
+        "skill_pref_2": 0.32592268769171073,
+        "skill_pref_3": 0.8711388004026382,
+        "noise": 0.010850989684857494
+      },
+      "best_winrate": 0.833333,
+      "total_evals": 31,
+      "early_stopped": true,
+      "total_wallclock_s": 38.682044506073
+    },
+    {
+      "char": "char_5",
+      "best_params": {
+        "priority": 0.29130106595004057,
+        "hp_danger": 0.40611270368184993,
+        "aggro": 0.8168717209771689,
+        "mark_weight": 0.19673940335395113,
+        "special_threshold": 0.9208422054604832,
+        "wild": "bal",
+        "skill_pref_0": 0.5082285566305152,
+        "skill_pref_1": 0.359925629150334,
+        "skill_pref_2": 0.7626276878114588,
+        "skill_pref_3": 0.025702518379257966,
+        "noise": 0.1305208657083705
+      },
+      "best_winrate": 0.462963,
+      "total_evals": 35,
+      "early_stopped": true,
+      "total_wallclock_s": 48.06116819381714
+    },
+    {
+      "char": "char_6",
+      "best_params": {
+        "priority": 0.19160551977662743,
+        "hp_danger": 0.3939689273946775,
+        "aggro": 0.6975577430258402,
+        "mark_weight": 1.3460644053941033,
+        "special_threshold": 0.28474246116569635,
+        "wild": "bal",
+        "skill_pref_0": 0.31038523594549394,
+        "skill_pref_1": 0.9509126160387392,
+        "skill_pref_2": 0.4722531167180004,
+        "skill_pref_3": 0.8991395930509137,
+        "noise": 0.13077541204407095
+      },
+      "best_winrate": 0.944444,
+      "total_evals": 33,
+      "early_stopped": true,
+      "total_wallclock_s": 49.124685764312744
+    },
+    {
+      "char": "char_7",
+      "best_params": {
+        "priority": 0.892924236386888,
+        "hp_danger": 0.4057606258875844,
+        "aggro": 0.18310995029590027,
+        "mark_weight": 0.6764181781143102,
+        "special_threshold": 0.39485217925359306,
+        "wild": "keep",
+        "skill_pref_0": 0.4115665415963421,
+        "skill_pref_1": 0.21275932328591274,
+        "skill_pref_2": 0.8927402721697233,
+        "skill_pref_3": 0.6279625702236458,
+        "noise": 0.15408293421878283
+      },
+      "best_winrate": 0.212963,
+      "total_evals": 36,
+      "early_stopped": true,
+      "total_wallclock_s": 43.28610563278198
+    },
+    {
+      "char": "char_8",
+      "best_params": {
+        "priority": 0.3370929581016523,
+        "hp_danger": 0.49172374829221654,
+        "aggro": 0.781842661949814,
+        "mark_weight": 1.8897868721023148,
+        "special_threshold": 0.7231715716636846,
+        "wild": "bal",
+        "skill_pref_0": 0.12996335970341544,
+        "skill_pref_1": 0.3907511867381708,
+        "skill_pref_2": 0.21294723492677647,
+        "skill_pref_3": 0.11084778525906758,
+        "noise": 0.12358763474234741
+      },
+      "best_winrate": 0.583333,
+      "total_evals": 37,
+      "early_stopped": true,
+      "total_wallclock_s": 45.98513722419739
+    },
+    {
+      "char": "char_9",
+      "best_params": {
+        "priority": 0.61024743244759,
+        "hp_danger": 0.3471815296788554,
+        "aggro": 0.5768932739428851,
+        "mark_weight": 1.9666101599501424,
+        "special_threshold": 0.4746947304982848,
+        "wild": "keep",
+        "skill_pref_0": 0.7485613673714685,
+        "skill_pref_1": 0.7688412973881397,
+        "skill_pref_2": 0.3785229727585928,
+        "skill_pref_3": 0.36548871283594764,
+        "noise": 0.16265238972997653
+      },
+      "best_winrate": 0.296296,
+      "total_evals": 26,
+      "early_stopped": true,
+      "total_wallclock_s": 33.33123755455017
+    }
+  ],
+  "total_wallclock_s": 353.92439556121826
+}

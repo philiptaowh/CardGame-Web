@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "CommonJS",
+    "lib": ["ES2020"],
+    "moduleResolution": "node",
+    "strict": false,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "outDir": "./dist-engine",
+    "rootDir": "./src",
+    "declaration": false,
+    "ignoreDeprecations": "6.0",
+    "types": ["node"]
+  },
+  "include": [
+    "src/ai/**/*.ts",
+    "src/simulator/**/*.ts",
+    "src/analysis/**/*.ts",
+    "src/types/**/*.ts",
+    "src/game/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "src/components",
+    "src/stores",
+    "src/hooks",
+    "src/services",
+    "src/App.tsx"
+  ]
+}

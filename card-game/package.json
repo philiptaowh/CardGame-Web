@@ -1,0 +1,50 @@
+{
+  "name": "card-game",
+  "private": true,
+  "version": "1.3.0",
+  "type": "module",
+  "main": "electron/main.cjs",
+  "scripts": {
+    "dev": "vite",
+    "dev:web": "vite --mode web",
+    "dev:server": "node electron/dev-server.cjs",
+    "build:engine": "tsc -p tsconfig.engine.json",
+    "build:simulator": "tsc -p tsconfig.simulator.json",
+    "build": "tsc -p tsconfig.engine.json && tsc -b && vite build",
+    "build:web": "tsc -p tsconfig.engine.json && tsc -b && vite build --mode web",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:save": "vitest run > test-results/run.log 2>&1",
+    "test:json": "vitest run --reporter json --outputFile test-results/results-pretty.json",
+    "pack": "tsc -p tsconfig.engine.json && vite build && electron-builder --win"
+  },
+  "dependencies": {
+    "lucide-react": "^1.16.0",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "ws": "^8.21.0",
+    "zustand": "^5.0.13"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@tailwindcss/vite": "^4.3.0",
+    "@types/node": "^24.12.3",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@types/ws": "^8.18.1",
+    "@vitejs/plugin-react": "^6.0.1",
+    "electron": "^35.0.0",
+    "electron-builder": "^26.0.0",
+    "eslint": "^10.3.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.2",
+    "globals": "^17.6.0",
+    "tailwindcss": "^4.3.0",
+    "typescript": "~6.0.2",
+    "typescript-eslint": "^8.59.2",
+    "vite": "^8.0.12",
+    "vitest": "^3.1.4"
+  }
+}

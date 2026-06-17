@@ -1,0 +1,22 @@
+{
+  "char": "char_7",
+  "best_params": {
+    "priority": 1.0,
+    "hp_danger": 0.5,
+    "aggro": 0.0,
+    "mark_weight": 0.21636828341274544,
+    "special_threshold": 0.7768006519940732,
+    "wild": "bal",
+    "skill_pref_0": 0.24698898725848967,
+    "skill_pref_1": 0.6340418329831375,
+    "skill_pref_2": 0.9892323852162321,
+    "skill_pref_3": 0.7558810562434531,
+    "noise": 0.19978859530238718
+  },
+  "best_winrate": 0.259259,
+  "total_evals": 100,
+  "early_stopped": false,
+  "total_wallclock_s": 144.06127214431763,
+  "library": "botorch",
+  "budget": 100
+}

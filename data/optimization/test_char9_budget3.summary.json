@@ -1,0 +1,16 @@
+{
+  "char": "char_9",
+  "best_params": {
+    "priority": 0.9890115134756001,
+    "hp_danger": 0.3648634180534176,
+    "aggro": 0.28144730195506285,
+    "mark_weight": 0.1545791321583454,
+    "special_threshold": 0.4444694959718031
+  },
+  "best_winrate": 0.277778,
+  "total_evals": 3,
+  "early_stopped": false,
+  "total_wallclock_s": 3.722968101501465,
+  "library": "skopt",
+  "budget": 3
+}

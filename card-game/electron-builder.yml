@@ -1,0 +1,19 @@
+appId: com.card-game.app
+productName: 卡牌游戏
+directories:
+  output: release
+  buildResources: electron
+files:
+  - dist/**/*
+  - dist-engine/**/*
+  - electron/**/*
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  shortcutName: 卡牌游戏

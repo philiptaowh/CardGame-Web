@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+
+# VS Code
+.vscode/
+
+# Claude Code
+.claude/
+
+# System
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Node.js / Build
+node_modules/
+dist-*/
+release/
+*.tgz
+
+# Test results
+test-results/
+# v2.2.1.4
+.env
+data/raw/*.jsonl
+*.log
+
