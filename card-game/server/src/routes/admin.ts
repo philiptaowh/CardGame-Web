@@ -57,15 +57,18 @@ adminRouter.get('/admin/replays', async (req, res) => {
 
   try {
     // 1) 查总数 (供客户端判断是否还有下一页)
-    const [countRows] = await getPool().execute<any[]>(
+    // v2.2.1.5 修复：用 query() 替代 execute() — mysql2 prepared statement 对 DATETIME ?
+    // 触发 "Incorrect arguments to mysqld_stmt_execute" 是已知 bug，query() 用 text
+    // 协议 + 客户端 escape 绕过。byChar/total 不涉及 DATETIME 参数保持 execute()。
+    const [countRows] = await getPool().query<any[]>(
       `SELECT COUNT(*) AS c FROM replays
         WHERE created_at >= ? AND created_at < ?`,
       [since, until],
     );
     const total = Number(countRows[0]?.c ?? 0);
 
-    // 2) 查当前页
-    const [rows] = await getPool().execute<any[]>(
+    // 2) 查当前页（同理用 query()）
+    const [rows] = await getPool().query<any[]>(
       `SELECT id, client_ip, user_agent, char_player, char_ai, winner,
               turn_count, duration_ms, moves_count, payload, created_at
          FROM replays
