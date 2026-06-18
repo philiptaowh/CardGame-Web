@@ -39,6 +39,9 @@ export function getPool(): mysql.Pool {
     enableKeepAlive: true,
     keepAliveInitialDelay: 10_000,
     charset: 'utf8mb4',
+    // v2.2.1.5 修复：schema.sql 含两个 CREATE TABLE，mysql2 默认 multipleStatements=false 会只发第一条
+    // 导致 test_progress 表永不被创建 + 启动报 ER_PARSE_ERROR
+    multipleStatements: true,
   });
 
   return pool;
