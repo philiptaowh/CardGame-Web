@@ -281,27 +281,47 @@
   - 字段：`isActive` / `currentStep` / `totalSteps` / `version` / `steps`
   - actions：`startTutorial` / `nextStep` / `prevStep` / `skipTutorial`
   - `version` 字段保留作未来内容热替换占位，**不参与触发判断**
-- [ ] **P2 tutorialSteps.ts** — 8 步教学内容（v2 文案，含 UI 区域描述）
-- [ ] **P3 TutorialOverlay.tsx** — 全屏遮罩 + 卡片化步骤 + 点导航 + 上下步 + 跳过按钮 + ESC 关闭
+- [ ] **P2 tutorialSteps.ts** — 9 步教学内容（v3 数据结构）
+  - `type: 'text'` 用于 step 1（欢迎）和 step 9（胜利+详细规则入口）
+  - `type: 'demo'` 用于 step 2-8（动画演示，含自动播放 4 步 + 交互 2 步）
+- [ ] **P3 TutorialOverlay.tsx** — 全屏遮罩 + 卡片化步骤 + 点导航 + 上下步 + 跳过按钮 + ESC 关闭 + type 分发
 - [ ] **P4 App.tsx 挂载** — App 根挂载 `<TutorialOverlay />`，全局唯一
 - [ ] **P5 TestPage 触发** — useEffect mount 时无脑 `startTutorial()`（无 localStorage 判断）；延迟 200ms 让页面 settle
 - [ ] **P6 CoverPage "?" 按钮** — 顶栏加 "?" 按钮，点击 `startTutorial()`，作手动唤起入口（前向兼容）
 - [ ] **P7 build 验证** — `npm run build` 零错误；TestPage 每次 mount 都触发；跳过立即关闭
 - [ ] **P8 同步 New_Card_Game_Web + 双端 push** — commit + push GitHub + push Gitee
 
+**v3 改造（文字 → 动画 + 交互）**：
+
+> 玩家反馈"全部是文字描述，不便于玩家理解"。v3 把纯文字教学改为"一局连续模拟对局"，6 步自动播放 + 2 步玩家交互：
+> - Step 4 玩家点击「技能 1: 普通攻击」+ 选能量卡 → 看进攻 HP -10 动画
+> - Step 5 玩家点击红色「攻击强化」特殊卡 → 平衡获得绿色「强化」印记
+>
+> 实现方式：5 个新组件（DemoBoard/DemoCharacterCard/DemoSpecialCard/DemoLog/DemoEnergyPayment），useReducer 管理交互状态机，CSS transition 处理动画。
+
+- [ ] **P9 5 个 Demo 组件** — DemoBoard.tsx（useReducer 状态机）/ DemoCharacterCard.tsx（可点击技能按钮）/ DemoSpecialCard.tsx / DemoLog.tsx / DemoEnergyPayment.tsx
+- [ ] **P10 tutorialSteps.ts 重构** — 联合类型 `{type:'text', text} | {type:'demo', state, caption, interactive?, expectedEndState?, prompt?}`
+- [ ] **P11 TutorialOverlay 分发** — type=text 时渲染文本卡；type=demo 时渲染 DemoBoard；interactive 时等用户完成动作再允许 next
+- [ ] **P12 build 验证 + 同步 + push** — 见 P7 P8
+
 **AC（验收）**：
-- 每次进入 TestPage 自动弹出 8 步教学
+- 每次进入 TestPage 自动弹出 9 步教学
 - 关闭/跳过后立即消失；下次进入仍触发
 - CoverPage "?" 按钮可主动唤起
 - 改 `tutorialSteps.ts` 文案不动组件逻辑
+- Step 4 玩家点击技能 → 弹能量支付 → 选卡确认 → 看 HP 动画
+- Step 5 玩家点击特殊卡 → 看印记 fade in
 - `npm run build` 零错误
 - 双端 push 后 GitHub/Gitee HEAD 一致
-- 关键文案已应用玩家修正：能量放置在弹窗、特殊卡无 inline 说明、Step 8 指向局内 Help 按钮位置
 
 **关键决策记录**：
 - 不持久化"已读"状态：每次进入都弹是教学而非广告，玩家主动点选 matchup 才离开教学态
 - UI 描述双锚定（功能名 + 相对位置）：即使 UI 重构到侧边栏，依然成立
 - GameBoard 已有 Help Modal（4 Tab：基础规则/角色百科/特殊卡牌/印记说明），Tutorial 走独立 Overlay 路线，两者并存不重复
+- v3 改用交互式：纯文字描述不直观，玩家点击实际操作更易理解（"click this skill button → see this happen"）
+- DemoBoard 用 useReducer 而非 useState：交互逻辑复杂（点击技能 → 弹支付 → 确认 → 更新状态 → 校验 → 完成），reducer 让状态变更可追溯
+- 演示用「平衡 vs 进攻」：平衡定位中性，进攻 HP 低 / 偏攻击，能展示"不同定位角色的交互"
+- Step 5 选「攻击强化」而非「急救」：避免前置掉血，演示「特殊卡获得增益印记」更直接
 
 ### v2.2.1.2 — Web 测试页 + 共享进度（🛠 进行中，2026-06-15）
 
