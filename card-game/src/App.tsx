@@ -9,6 +9,7 @@ import { SettingsButton } from './components/SettingsButton';
 import { SettingsModal } from './components/SettingsModal';
 import { ToastContainer } from './components/Toast';
 import { ConsentGate } from './components/ConsentGate';
+import { TutorialOverlay } from './components/Tutorial/TutorialOverlay';
 import { useSettingsStore } from './stores/settingsStore';
 
 type Page = 'cover' | 'ai-select' | 'lobby' | 'game' | 'lan-game' | 'test';
@@ -79,6 +80,9 @@ function App() {
 
         {/* Toast 通知 — 固定右上角 */}
         <ToastContainer />
+
+        {/* v2.2.1.5: 游戏教学 Overlay — 全局唯一挂载，由各页面通过 store 触发 */}
+        <TutorialOverlay />
       </div>
     </ConsentGate>
   );

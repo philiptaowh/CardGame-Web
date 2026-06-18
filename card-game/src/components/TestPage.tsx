@@ -27,6 +27,7 @@ import {
 import { useGameStore } from '../stores/gameStore';
 import { useSettingsStore } from '../stores/settingsStore';
 import { useToastStore } from '../stores/toastStore';
+import { useTutorialStore } from '../stores/tutorialStore';
 import { getCharacterById } from '../game/characters';
 
 const AI_BO_WINRATE: Record<string, number> = {
@@ -67,6 +68,14 @@ export function TestPage({ onBack, onStartGame, onOpenSettings }: TestPageProps)
   const [showMigrationDialog, setShowMigrationDialog] = useState(false);
   const [showRandomConfirm, setShowRandomConfirm] = useState(false);
   const lastGameOverKeyRef = useRef<string | null>(null);
+
+  // 0. v2.2.1.5: 首次 mount 自动触发教学（每次 mount 都触发，可跳过；延迟 200ms 让页面 settle）
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      useTutorialStore.getState().startTutorial();
+    }, 200);
+    return () => clearTimeout(timer);
+  }, []);
 
   // 1. 首次 mount: fetch + 检查是否需要迁移
   useEffect(() => {

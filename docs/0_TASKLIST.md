@@ -268,6 +268,41 @@
 
 - ✅ V1 验证通过后 → 下一轮解除 V2 BO 对 char_7 的屏蔽（V2.2.1 → V2.1.1 phase 2 大规模验收）
 
+### v2.2.1.5 — 游戏教学引导（🆕 待启动，2026-06-18）
+
+> **背景**：体验玩家反馈游戏缺乏基本引导，新玩家进入测试版后不知三阶段机制、印记/护盾/穿透区别、血战规则等。
+> **设计原则**：
+> - **触发器与内容解耦**（未来触发位置可换：TestPage → CoverPage / GameBoard / 其他）
+> - **每次进入 TestPage 都触发，可跳过**（无 localStorage 持久化；版本号保留作未来内容热替换占位）
+> - **步骤数据化**（`tutorialSteps.ts`，改文案不动组件逻辑）
+> - **UI 描述用功能性名词 + 相对位置**，避免绑死按钮 className（未来 UI 重构后文案不失效）
+
+- [ ] **P1 tutorialStore.ts** — Zustand store（无 persist 中间件）：
+  - 字段：`isActive` / `currentStep` / `totalSteps` / `version` / `steps`
+  - actions：`startTutorial` / `nextStep` / `prevStep` / `skipTutorial`
+  - `version` 字段保留作未来内容热替换占位，**不参与触发判断**
+- [ ] **P2 tutorialSteps.ts** — 8 步教学内容（v2 文案，含 UI 区域描述）
+- [ ] **P3 TutorialOverlay.tsx** — 全屏遮罩 + 卡片化步骤 + 点导航 + 上下步 + 跳过按钮 + ESC 关闭
+- [ ] **P4 App.tsx 挂载** — App 根挂载 `<TutorialOverlay />`，全局唯一
+- [ ] **P5 TestPage 触发** — useEffect mount 时无脑 `startTutorial()`（无 localStorage 判断）；延迟 200ms 让页面 settle
+- [ ] **P6 CoverPage "?" 按钮** — 顶栏加 "?" 按钮，点击 `startTutorial()`，作手动唤起入口（前向兼容）
+- [ ] **P7 build 验证** — `npm run build` 零错误；TestPage 每次 mount 都触发；跳过立即关闭
+- [ ] **P8 同步 New_Card_Game_Web + 双端 push** — commit + push GitHub + push Gitee
+
+**AC（验收）**：
+- 每次进入 TestPage 自动弹出 8 步教学
+- 关闭/跳过后立即消失；下次进入仍触发
+- CoverPage "?" 按钮可主动唤起
+- 改 `tutorialSteps.ts` 文案不动组件逻辑
+- `npm run build` 零错误
+- 双端 push 后 GitHub/Gitee HEAD 一致
+- 关键文案已应用玩家修正：能量放置在弹窗、特殊卡无 inline 说明、Step 8 指向局内 Help 按钮位置
+
+**关键决策记录**：
+- 不持久化"已读"状态：每次进入都弹是教学而非广告，玩家主动点选 matchup 才离开教学态
+- UI 描述双锚定（功能名 + 相对位置）：即使 UI 重构到侧边栏，依然成立
+- GameBoard 已有 Help Modal（4 Tab：基础规则/角色百科/特殊卡牌/印记说明），Tutorial 走独立 Overlay 路线，两者并存不重复
+
 ### v2.2.1.2 — Web 测试页 + 共享进度（🛠 进行中，2026-06-15）
 
 > **背景**：v2.2.1.1 V1 角色修复 + 隐私弹窗 z-index 修复后，启动 V2 char_7 解锁并改造测试页。

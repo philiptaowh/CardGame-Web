@@ -7,8 +7,9 @@
 //   - 退出按钮在桌面模式下显示
 
 import { useState } from 'react';
-import { LogOut, Power, Swords, Wifi, ClipboardList } from 'lucide-react';
+import { LogOut, Power, Swords, Wifi, ClipboardList, HelpCircle } from 'lucide-react';
 import { isWebMode } from '../config/buildMode';
+import { useTutorialStore } from '../stores/tutorialStore';
 
 interface CoverPageProps {
   onAI: () => void;
@@ -137,6 +138,19 @@ export function CoverPage({ onAI, onLAN, onTest }: CoverPageProps) {
           </button>
         </div>
       )}
+
+      {/* v2.2.1.5: 教学入口按钮（左下角，"?"图标；手动唤起教学，前向兼容） */}
+      <div className="fixed bottom-8 left-8">
+        <button
+          data-testid="cover-tutorial-button"
+          onClick={() => useTutorialStore.getState().startTutorial()}
+          className="flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-600/10 hover:bg-indigo-600 text-indigo-400 hover:text-white border border-indigo-500/30 hover:border-indigo-500 shadow-lg transition-all duration-300"
+          aria-label="打开游戏教学"
+        >
+          <HelpCircle className="w-5 h-5" />
+          <span className="font-medium">游戏教学</span>
+        </button>
+      </div>
 
       {/* 退出确认弹窗（web 模式不会触发） */}
       {showExitModal && (
