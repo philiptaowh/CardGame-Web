@@ -574,17 +574,23 @@ export class GameEngine {
         damage = 2;
         addMarkWithReplacement(target, '弱化', 1);
       } else if (skillIndex === 1) {
-        // 衰弱 (cost 2): 弱化 2 回合；若目标已有弱化 → 自身治疗 2 回合
-        addMarkWithReplacement(target, '弱化', 2);
+        // 衰弱 (cost 2): v2.2.1.6 修复判定顺序
+        // 修正前：先 addMarkWithReplacement 再 some(...) 判断，导致条件永远 true
+        // 修正后：先判定 → 已有弱化则不加重复挂、改为自我治疗；没有则加弱化 2 回合
         if (target.marks.some(m => m.name === '弱化')) {
           addMarkWithReplacement(player, '治疗', 2);
+        } else {
+          addMarkWithReplacement(target, '弱化', 2);
         }
       } else if (skillIndex === 2) {
-        // 虚弱 (cost 3): 弱化 2 回合；若目标已有弱化 → 失明 + 失神 1 回合
-        addMarkWithReplacement(target, '弱化', 2);
+        // 虚弱 (cost 3): v2.2.1.6 修复判定顺序
+        // 修正前：同上，导致条件永远 true
+        // 修正后：已有弱化则不加重复挂、改为挂失明 + 失神；没有则加弱化 2 回合
         if (target.marks.some(m => m.name === '弱化')) {
           addMarkWithReplacement(target, '失明', 1);
           addMarkWithReplacement(target, '失神', 1);
+        } else {
+          addMarkWithReplacement(target, '弱化', 2);
         }
       } else if (skillIndex === 3) {
         // 朽灭 (cost 6): 6 dmg；若 turn > 8 → 目标受 Math.floor(player.current_hp/10) dmg + pen
