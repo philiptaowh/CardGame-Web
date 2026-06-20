@@ -297,7 +297,7 @@
 - 不持久化 V1 测试录像或 AI 仿真历史数据：此次修复只影响后续生成
 - 没有写新测试：现有 char_7 测试在 `__test__/` 目录不存在，本次修复不写新测试（避免扩大改动范围）
 
-### v2.2.1.11 — 桌面/Web 双端测试进度隔离（🆕 待启动，2026-06-20）
+### v2.2.1.11 — 桌面/Web 双端测试进度隔离（✅ 已完成 2026-06-20）
 
 > **背景**：本地 `npm run dev` 时 testProgressStore 会 fetch 远端 API，无后端时返回
 > `<!doctype html>` 导致 JSON 解析失败，测试模式无法使用。
@@ -307,16 +307,11 @@
 
 - [x] **P1 testProgressStore.ts** — 3 个本地工具函数（load/save/seed）+ 4 个 action 的桌面分支
 - [x] **P2 TestPage.tsx** — 桌面模式隐藏同步指示器 + 显示「📁 本地模式」徽章 + 提示文案双端切换
-- [ ] **P3 build 验证** — `npm run build` 零错误
+- [x] **P3 build 验证** — `npm run build` 零错误（用户确认通过）
 
-**AC（验收）**：
-- 修复后：`npm run dev` 进入测试页显示 0/810，无报错，可正常玩 ✓
-- 修复后：本地玩完 1 局，刷新后再进 → completed 保持（localStorage 持久化）✓
-- 修复后：桌面模式显示「📁 本地模式」徽章而非「上次同步 Ns 前」✓
-- 修复后：Web 模式行为完全不变（不写 localStorage、不走本地路径）✓
-- `npm run build` 零错误
+**AC（验收）**：✅ 全部通过（双端 push 已到 ac79a0b）
 
-### v2.2.1.9 — 特殊卡 5「先手」3 个 bug 修复（🆕 待启动，2026-06-20）
+### v2.2.1.9 — 特殊卡 5「先手」3 个 bug 修复（✅ 已完成 2026-06-20）
 
 > **背景**：游玩中发现特殊卡 5「先手」效果不生效，且能量放置结果弹窗不显示。
 > 分析发现 3 个相关 bug 一起导致（modifier 失效链路）：
@@ -330,28 +325,18 @@
 > **方案**：引入 `next_turn_action_order_modifier`（参考现有 `next_turn_damage_modifier` 的"先 apply 再 reset"模式），
 > 修复 modifier 跨回合生效链路 + 让 sort 真正使用 + 弹窗显示「⚡先手」徽章。
 
-- [ ] **P1 types/index.ts 扩展** — `EnergyResultEntry` 加 `usedFirstStrikeCard: boolean`
-- [ ] **P2 gameEngine.ts 加字段** — Player 加 `next_turn_action_order_modifier` 字段
-- [ ] **P3 gameEngine.ts useSpecialCard case 5** — 改为写 `next_turn_action_order_modifier -= 100`
-- [ ] **P4 gameEngine.ts resolveMarks** — apply 模式：复制到 `action_order_modifier` 然后清零新字段
-- [ ] **P5 gameEngine.ts advancePhase sort** — 比较链加 modifier 优先级
-- [ ] **P6 gameEngine.ts phase1Results** — 读 modifier < 0 写入 `usedFirstStrikeCard`
-- [ ] **P7 EnergyResultModal.tsx** — 玩家名 + 「⚡先手」徽章 + tooltip
-- [ ] **P8 build 验证** — `npx tsc --noEmit` + `npm run build` 零错误
+- [x] **P1 types/index.ts 扩展** — `EnergyResultEntry` 加 `usedFirstStrikeCard: boolean`
+- [x] **P2 gameEngine.ts 加字段** — Player 加 `next_turn_action_order_modifier` 字段
+- [x] **P3 gameEngine.ts useSpecialCard case 5** — 改为写 `next_turn_action_order_modifier -= 100`
+- [x] **P4 gameEngine.ts resolveMarks** — apply 模式：复制到 `action_order_modifier` 然后清零新字段
+- [x] **P5 gameEngine.ts advancePhase sort** — 比较链加 modifier 优先级
+- [x] **P6 gameEngine.ts phase1Results** — 读 modifier < 0 写入 `usedFirstStrikeCard`
+- [x] **P7 EnergyResultModal.tsx** — 玩家名 + 「⚡先手」徽章 + tooltip
+- [x] **P8 build 验证** — `npx tsc --noEmit` + `npm run build` 零错误（用户确认通过）
 
-**AC（验收）**：
-- 修复后：玩家用特殊卡 5 → 弃 1 张 → 下一回合 phase1 排序该玩家排第 1 ✓
-- 修复后：能量放置结果弹窗显示该玩家的「⚡先手」徽章 ✓
-- 修复后：modifier < 0 的玩家即使能量值较低，仍优先行动 ✓
-- 保持：未用特殊卡 5 时弹窗无徽章 ✓
-- `npm run build` 零错误
+**AC（验收）**：✅ 数据链路完整，未同步 Web 仓库（与 v2.2.1.11 同批推送 ac79a0b）
 
-**关键决策**：
-- 复用 `next_turn_damage_modifier` 已有模式，避免引入新概念
-- `usedFirstStrikeCard` schema 加在 EnergyResultEntry 是前向兼容（旧录像无此字段默认 false）
-- 弹窗徽章颜色用紫色（特殊卡 5 本身无颜色定义，用紫色与「特殊/魔法」语义关联）
-
-### v2.2.1.10 — 移除「重置全部进度」UI + 新增 admin 脚本（🆕 待启动，2026-06-20）
+### v2.2.1.10 — 移除「重置全部进度」UI + 新增 admin 脚本（✅ 已完成 2026-06-20）
 
 > **背景**：「重置全部进度」按钮在前端任意玩家可点 + 后端路由无鉴权，
 > 单次点击/curl 即可清空所有 81 matchup × 10 = 810 局共享进度（不可逆）。
@@ -363,26 +348,14 @@
 > 3. **新增 admin 脚本**：tools/admin-reset-progress.cjs + tools/admin-stats.cjs
 >    强制要求 `--yes` 二次确认，避免误操作
 
-- [ ] **P1 TestPage.tsx 删除 5 处** — 注释 / 解构 / handleReset 函数 / 按钮 JSX / RotateCcw import
-- [ ] **P2 tools/admin-reset-progress.cjs** — POST /api/test-progress/reset + 显示当前状态 + --yes 强制确认
-- [ ] **P3 tools/admin-stats.cjs** — GET /api/admin/stats（需 ADMIN_TOKEN）+ 总览统计
-- [ ] **P4 DEPLOY.md §13 更新** — 加 admin 脚本章节（与 pull_replays.cjs 并列）
-- [ ] **P5 build 验证** — `npx tsc --noEmit` + `npm run build` 零错误
-- [ ] **P6 同步 New_Card_Game_Web + commit + 双端 push**
+- [x] **P1 TestPage.tsx 删除 5 处** — 注释 / 解构 / handleReset 函数 / 按钮 JSX / RotateCcw import
+- [x] **P2 tools/admin-reset-progress.cjs** — POST /api/test-progress/reset + 显示当前状态 + --yes 强制确认
+- [x] **P3 tools/admin-stats.cjs** — GET /api/admin/stats（需 ADMIN_TOKEN）+ 总览统计
+- [x] **P4 DEPLOY.md §14.5 更新** — 加 admin 脚本章节（与 pull_replays.cjs 并列）
+- [x] **P5 build 验证** — `npx tsc --noEmit` + `npm run build` 零错误（用户确认通过）
+- [x] **P6 同步 New_Card_Game_Web + commit + 双端 push** — 已随 ac79a0b 推送
 
-**AC（验收）**：
-- 修复后：TestPage 不显示「重置全部进度」按钮
-- 修复后：玩家无法通过任何前端路径触发 reset
-- 修复后：admin 可用 `node tools/admin-reset-progress.cjs --yes` 完成重置
-- 修复后：admin 可用 `node tools/admin-stats.cjs` 查看统计
-- 修复后：脚本不带 `--yes` 标志时拒绝执行（防误触）
-- DEPLOY.md 文档完整描述脚本用法
-- `npm run build` 零错误
-
-**关键决策（5_AGENT_RULES §2 HITL + 职责分离）**：
-- 「保留 store + 后端」而非「全删」：保留 admin 工具的可控入口，符合权限分层
-- 脚本强制 `--yes`：二次确认机制，防脚本调用方误传
-- 不改后端鉴权（本次范围）：保留 store + route 仅删除 UI；后续若需要可单独加 ADMIN_TOKEN 校验
+**AC（验收）**：✅ 全部通过（随 ac79a0b 推送 GitHub + Gitee）
 
 ### v2.2.1.7 — 先手技能「未行动」状态修复（✅ 已完成 2026-06-20）
 
