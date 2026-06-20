@@ -13,7 +13,7 @@
 
 import { create } from 'zustand';
 import type { CharacterId } from '../types';
-import { apiUrl } from '../config/buildMode';
+import { apiUrl, isWebMode } from '../config/buildMode';
 
 // ============ 类型定义 ============
 
@@ -94,6 +94,68 @@ function clearLegacyLocalStorage(): void {
   localStorage.removeItem(LEGACY_LS_KEY);
 }
 
+// ============ v2.2.1.11 本地模式存储（桌面端独立于服务端） ============
+
+const LOCAL_LS_KEY = 'card-game-test-progress-local';
+
+interface LocalProgressEntry {
+  completed: number;
+  target: number;
+  completedAt: number[];
+}
+
+type LocalProgressData = Record<string, LocalProgressEntry>;
+
+function loadLocalProgressData(): LocalProgressData | null {
+  if (typeof localStorage === 'undefined') return null;
+  const raw = localStorage.getItem(LOCAL_LS_KEY);
+  if (!raw) return null;
+  try { return JSON.parse(raw) as LocalProgressData; } catch { return null; }
+}
+
+function saveLocalProgressData(data: LocalProgressData): void {
+  if (typeof localStorage === 'undefined') return;
+  localStorage.setItem(LOCAL_LS_KEY, JSON.stringify(data));
+}
+
+function seedLocalEmptyData(): LocalProgressData {
+  const data: LocalProgressData = {};
+  for (let h = 1; h <= 9; h++) {
+    for (let a = 1; a <= 9; a++) {
+      const key = `char_${h}|char_${a}`;
+      data[key] = { completed: 0, target: 10, completedAt: [] };
+    }
+  }
+  saveLocalProgressData(data);
+  return data;
+}
+
+function localDataToProgress(data: LocalProgressData): Record<string, MatchupProgress> {
+  const progress: Record<string, MatchupProgress> = {};
+  for (const [key, entry] of Object.entries(data)) {
+    const parts = key.split('|');
+    progress[key] = {
+      matchupKey: key,
+      humanChar: parts[0] as CharacterId,
+      aiChar: parts[1] as CharacterId,
+      target: entry.target,
+      completed: entry.completed,
+      status: entry.completed >= entry.target ? 'locked' : 'available',
+    };
+  }
+  return progress;
+}
+
+function calcLocalStats(progress: Record<string, MatchupProgress>): TestProgressStats {
+  const values = Object.values(progress);
+  const total = values.length;
+  const locked = values.filter(m => m.status === 'locked').length;
+  const available = total - locked;
+  const completed = values.reduce((sum, m) => sum + m.completed, 0);
+  const target = values.reduce((sum, m) => sum + m.target, 0);
+  return { total, locked, available, completed, target, remaining: target - completed };
+}
+
 // ============ Store 实现 ============
 
 export const useTestProgressStore = create<TestProgressStore>((set, get) => ({
@@ -108,6 +170,22 @@ export const useTestProgressStore = create<TestProgressStore>((set, get) => ({
   lastSyncedAt: null,
 
   fetchProgress: async () => {
+    // v2.2.1.11: desktop 模式走 localStorage，不调远程 API
+    if (!isWebMode()) {
+      const local = loadLocalProgressData();
+      const data = local ?? seedLocalEmptyData();
+      const progress = localDataToProgress(data);
+      set({
+        progress,
+        stats: calcLocalStats(progress),
+        config: { defaultTarget: 10, version: 1 },
+        isLoading: false,
+        error: null,
+        lastSyncedAt: Date.now(),
+      });
+      return true;
+    }
+
     set({ isLoading: true, error: null });
     try {
       const res = await fetch(apiUrl('/api/test-progress'));
@@ -150,6 +228,24 @@ export const useTestProgressStore = create<TestProgressStore>((set, get) => ({
   },
 
   incrementMatchupAsync: async (humanChar, aiChar) => {
+    // v2.2.1.11: desktop 模式走 localStorage
+    if (!isWebMode()) {
+      const key = `${humanChar}|${aiChar}`;
+      const local = loadLocalProgressData();
+      if (!local) return { ok: false, error: 'local data not found', code: 'NETWORK' };
+      const entry = local[key];
+      if (!entry) return { ok: false, error: `matchup ${key} not found`, code: 'NETWORK' };
+      if (entry.completed >= entry.target) {
+        return { ok: false, error: `matchup ${key} 已锁定`, code: 'LOCKED' };
+      }
+      entry.completed += 1;
+      entry.completedAt.push(Date.now());
+      saveLocalProgressData(local);
+      const progress = localDataToProgress(local);
+      set({ progress, stats: calcLocalStats(progress), lastSyncedAt: Date.now() });
+      return { ok: true, data: progress[key] };
+    }
+
     try {
       const res = await fetch(apiUrl('/api/test-progress/increment'), {
         method: 'POST',
@@ -186,6 +282,14 @@ export const useTestProgressStore = create<TestProgressStore>((set, get) => ({
   },
 
   selectRandomMatchupAsync: async () => {
+    // v2.2.1.11: desktop 模式从本地 store state 随机选
+    if (!isWebMode()) {
+      const available = Object.values(get().progress).filter(m => m.status === 'available');
+      if (available.length === 0) return null;
+      const idx = Math.floor(Math.random() * available.length);
+      return available[idx] ?? null;
+    }
+
     try {
       const res = await fetch(apiUrl('/api/test-progress/select-random'), {
         method: 'POST',
@@ -204,6 +308,14 @@ export const useTestProgressStore = create<TestProgressStore>((set, get) => ({
   },
 
   resetAllAsync: async () => {
+    // v2.2.1.11: desktop 模式清空 localStorage + 重新 seed
+    if (!isWebMode()) {
+      const data = seedLocalEmptyData();
+      const progress = localDataToProgress(data);
+      set({ progress, stats: calcLocalStats(progress), isLoading: false, error: null, lastSyncedAt: Date.now() });
+      return true;
+    }
+
     set({ isLoading: true, error: null });
     try {
       const res = await fetch(apiUrl('/api/test-progress/reset'), {

@@ -297,6 +297,128 @@
 - 不持久化 V1 测试录像或 AI 仿真历史数据：此次修复只影响后续生成
 - 没有写新测试：现有 char_7 测试在 `__test__/` 目录不存在，本次修复不写新测试（避免扩大改动范围）
 
+### v2.2.1.11 — 桌面/Web 双端测试进度隔离（🆕 待启动，2026-06-20）
+
+> **背景**：本地 `npm run dev` 时 testProgressStore 会 fetch 远端 API，无后端时返回
+> `<!doctype html>` 导致 JSON 解析失败，测试模式无法使用。
+> 
+> **方案**：`isWebMode()` 路由 — 4 个 action 在桌面模式走 localStorage，
+> Web 模式走服务端 API。桌面进度保存在浏览器，跨会话保留。
+
+- [x] **P1 testProgressStore.ts** — 3 个本地工具函数（load/save/seed）+ 4 个 action 的桌面分支
+- [x] **P2 TestPage.tsx** — 桌面模式隐藏同步指示器 + 显示「📁 本地模式」徽章 + 提示文案双端切换
+- [ ] **P3 build 验证** — `npm run build` 零错误
+
+**AC（验收）**：
+- 修复后：`npm run dev` 进入测试页显示 0/810，无报错，可正常玩 ✓
+- 修复后：本地玩完 1 局，刷新后再进 → completed 保持（localStorage 持久化）✓
+- 修复后：桌面模式显示「📁 本地模式」徽章而非「上次同步 Ns 前」✓
+- 修复后：Web 模式行为完全不变（不写 localStorage、不走本地路径）✓
+- `npm run build` 零错误
+
+### v2.2.1.9 — 特殊卡 5「先手」3 个 bug 修复（🆕 待启动，2026-06-20）
+
+> **背景**：游玩中发现特殊卡 5「先手」效果不生效，且能量放置结果弹窗不显示。
+> 分析发现 3 个相关 bug 一起导致（modifier 失效链路）：
+
+| # | 严重度 | 描述 |
+|---|---|---|
+| #3 | 🔴 严重 | `action_order_modifier` 在 turn 末被重置，下回合 phase1 已是 0 |
+| #1 | 🔴 严重 | `advancePhase` sort 不读 modifier，等于 dead code |
+| #2 | 🟡 UX | `EnergyResultModal` 不显示「先手」标记，玩家不知道为什么排序 |
+
+> **方案**：引入 `next_turn_action_order_modifier`（参考现有 `next_turn_damage_modifier` 的"先 apply 再 reset"模式），
+> 修复 modifier 跨回合生效链路 + 让 sort 真正使用 + 弹窗显示「⚡先手」徽章。
+
+- [ ] **P1 types/index.ts 扩展** — `EnergyResultEntry` 加 `usedFirstStrikeCard: boolean`
+- [ ] **P2 gameEngine.ts 加字段** — Player 加 `next_turn_action_order_modifier` 字段
+- [ ] **P3 gameEngine.ts useSpecialCard case 5** — 改为写 `next_turn_action_order_modifier -= 100`
+- [ ] **P4 gameEngine.ts resolveMarks** — apply 模式：复制到 `action_order_modifier` 然后清零新字段
+- [ ] **P5 gameEngine.ts advancePhase sort** — 比较链加 modifier 优先级
+- [ ] **P6 gameEngine.ts phase1Results** — 读 modifier < 0 写入 `usedFirstStrikeCard`
+- [ ] **P7 EnergyResultModal.tsx** — 玩家名 + 「⚡先手」徽章 + tooltip
+- [ ] **P8 build 验证** — `npx tsc --noEmit` + `npm run build` 零错误
+
+**AC（验收）**：
+- 修复后：玩家用特殊卡 5 → 弃 1 张 → 下一回合 phase1 排序该玩家排第 1 ✓
+- 修复后：能量放置结果弹窗显示该玩家的「⚡先手」徽章 ✓
+- 修复后：modifier < 0 的玩家即使能量值较低，仍优先行动 ✓
+- 保持：未用特殊卡 5 时弹窗无徽章 ✓
+- `npm run build` 零错误
+
+**关键决策**：
+- 复用 `next_turn_damage_modifier` 已有模式，避免引入新概念
+- `usedFirstStrikeCard` schema 加在 EnergyResultEntry 是前向兼容（旧录像无此字段默认 false）
+- 弹窗徽章颜色用紫色（特殊卡 5 本身无颜色定义，用紫色与「特殊/魔法」语义关联）
+
+### v2.2.1.10 — 移除「重置全部进度」UI + 新增 admin 脚本（🆕 待启动，2026-06-20）
+
+> **背景**：「重置全部进度」按钮在前端任意玩家可点 + 后端路由无鉴权，
+> 单次点击/curl 即可清空所有 81 matchup × 10 = 810 局共享进度（不可逆）。
+> 当前机制风险：玩家误触 / 恶意清空 / 浏览器开发者工具直接调 API。
+>
+> **方案**：分层防御
+> 1. **前端**：删除 UI 按钮（玩家无入口）
+> 2. **保留 store + 后端路由**：admin 可通过脚本/curl 访问
+> 3. **新增 admin 脚本**：tools/admin-reset-progress.cjs + tools/admin-stats.cjs
+>    强制要求 `--yes` 二次确认，避免误操作
+
+- [ ] **P1 TestPage.tsx 删除 5 处** — 注释 / 解构 / handleReset 函数 / 按钮 JSX / RotateCcw import
+- [ ] **P2 tools/admin-reset-progress.cjs** — POST /api/test-progress/reset + 显示当前状态 + --yes 强制确认
+- [ ] **P3 tools/admin-stats.cjs** — GET /api/admin/stats（需 ADMIN_TOKEN）+ 总览统计
+- [ ] **P4 DEPLOY.md §13 更新** — 加 admin 脚本章节（与 pull_replays.cjs 并列）
+- [ ] **P5 build 验证** — `npx tsc --noEmit` + `npm run build` 零错误
+- [ ] **P6 同步 New_Card_Game_Web + commit + 双端 push**
+
+**AC（验收）**：
+- 修复后：TestPage 不显示「重置全部进度」按钮
+- 修复后：玩家无法通过任何前端路径触发 reset
+- 修复后：admin 可用 `node tools/admin-reset-progress.cjs --yes` 完成重置
+- 修复后：admin 可用 `node tools/admin-stats.cjs` 查看统计
+- 修复后：脚本不带 `--yes` 标志时拒绝执行（防误触）
+- DEPLOY.md 文档完整描述脚本用法
+- `npm run build` 零错误
+
+**关键决策（5_AGENT_RULES §2 HITL + 职责分离）**：
+- 「保留 store + 后端」而非「全删」：保留 admin 工具的可控入口，符合权限分层
+- 脚本强制 `--yes`：二次确认机制，防脚本调用方误传
+- 不改后端鉴权（本次范围）：保留 store + route 仅删除 UI；后续若需要可单独加 ADMIN_TOKEN 校验
+
+### v2.2.1.7 — 先手技能「未行动」状态修复（✅ 已完成 2026-06-20）
+
+> **背景**：游玩中发现 char_5「先手」角色技能 1/2/3 的「若该玩家还未行动则 X」加成，
+> 对处于睡眠状态的对手**不触发**。根因：`advancePhase()` 在被睡眠跳过调用时
+> （line 410 / 906 / 递归）会**错误地标记**睡眠玩家的 `has_acted_this_turn = true`，
+> 违反 `extra_rule.md`「睡眠跳过的玩家不标记已行动」的裁定。
+
+> **方案（职责分离）**：在 `gameEngine.ts` 新增领域方法 `skipCurrentPlayerTurn()`，
+> 统一封装「因状态无法行动 → 跳过」的逻辑（补偿 + 不标记 + 推进 + 递归）。
+> `advancePhase()` 保持高层逻辑不变，仅在 NEXT-sleep 分支委托给新方法。
+> 3 处 sleep 调用点（line 410 useSkill、line 906 phase1→phase2、line 938 advancePhase 递归）
+> 全部改用 `skipCurrentPlayerTurn()`，避免重复代码与逻辑污染。
+
+- [x] **P1 gameEngine.ts 新增 skipCurrentPlayerTurn()** — 补偿 +2 HP + 不标记 + 推进 + 递归睡眠 + 抽牌
+- [x] **P2 gameEngine.ts 改写 advancePhase() 的 NEXT-sleep 分支** — mark current → 委托 skipCurrentPlayerTurn
+- [x] **P3 gameEngine.ts 替换 2 个调用点** — line 410 (useSkill) + line 906 (phase1→phase2) 改用 skipCurrentPlayerTurn
+- [x] **P4 build 验证** — `npx tsc --noEmit` Exit 0（用户本地 npm run build 待确认）
+- [ ] **P5 同步 New_Card_Game_Web + commit + 双端 push**（⏸ 暂不操作，等待用户决定）
+
+**AC（验收）**：✅ 代码修复全部完成（待 build + push）
+
+### v2.2.1.8 — char_5 技能 3 平衡调整（✅ 已完成 2026-06-20）
+
+> **背景**：先手（char_5）技能 3「鼓舞」原本只给一个正面印记，
+> 强度偏低。本次调整为：若该玩家还未行动，则为自己附加
+> **「鼓舞」「灵感」「流血」** 三个印记各 1 回合（2 正 + 1 负的权衡）。
+
+- [x] **P1 gameEngine.ts char_5 技能 3** — 在附加「鼓舞」后增加「灵感」+「流血」印记
+- [x] **P2 characters.ts 同步文案** — 技能 3 description 改为附加三个印记
+- [x] **P3 卡牌游戏原型.md 同步** — 技能 3 描述同步
+- [x] **P4 build 验证** — `npx tsc --noEmit` Exit 0
+- [ ] **P5 同步 New_Card_Game_Web + commit + 双端 push**（⏸ 暂不操作，等待用户决定）
+
+**AC（验收）**：✅ 代码修复全部完成（待 build + push）
+
 ### v2.2.1.5 — 游戏教学引导（🆕 待启动，2026-06-18）
 
 > **背景**：体验玩家反馈游戏缺乏基本引导，新玩家进入测试版后不知三阶段机制、印记/护盾/穿透区别、血战规则等。

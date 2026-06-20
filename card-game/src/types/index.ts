@@ -72,6 +72,8 @@ export interface Player {
   next_turn_damage_modifier: number;
   next_turn_heal_modifier: number;
   next_turn_penetration_modifier: number;
+  // v2.2.1.9 新增：跨回合生效的行动顺序修正（特殊卡 5「先手」使用）
+  next_turn_action_order_modifier: number;
   // 本回合是否受过伤害
   took_damage_this_turn: boolean;
   has_acted_this_turn: boolean;
@@ -101,6 +103,8 @@ export interface EnergyResultEntry {
   name: string;
   energy: number;
   cardCount: number;
+  /** v2.2.1.9 新增：是否在上一回合使用了特殊卡 5「先手」获得本回合优先行动权 */
+  usedFirstStrikeCard: boolean;
 }
 
 export interface GameState {

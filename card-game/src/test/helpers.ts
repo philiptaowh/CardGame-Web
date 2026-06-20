@@ -56,6 +56,8 @@ export function createTestPlayer(
     nextTurnDamageModifier: number;
     nextTurnHealModifier: number;
     nextTurnPenetrationModifier: number;
+    // v2.2.1.9 新增：跨回合生效的行动顺序修正（特殊卡 5「先手」测试）
+    nextTurnActionOrderModifier: number;
     hasBlind: boolean;
     hasConfusion: boolean;
     hasSleep: boolean;
@@ -81,6 +83,8 @@ export function createTestPlayer(
     next_turn_damage_modifier: options?.nextTurnDamageModifier ?? 0,
     next_turn_heal_modifier: options?.nextTurnHealModifier ?? 0,
     next_turn_penetration_modifier: options?.nextTurnPenetrationModifier ?? 0,
+    // v2.2.1.9 新增：跨回合行动顺序修正（默认 0，特殊卡 5「先手」测试时可覆盖）
+    next_turn_action_order_modifier: options?.nextTurnActionOrderModifier ?? 0,
     took_damage_this_turn: false,
     has_acted_this_turn: options?.hasActedThisTurn ?? false,
     skills_used_this_turn: options?.skillsUsedThisTurn ?? 0,

@@ -740,3 +740,75 @@ bash card-game/scripts/backup-mysql.sh
 ### 14.4 录像下载：`tools/pull_replays.cjs`
 
 详见 §13.2。
+
+### 14.5 Admin 脚本：`tools/admin-*.cjs`（v2.2.1.10 新增）
+
+> **背景**：v2.2.1.10 移除了前端「重置全部进度」按钮（玩家无入口防误触），
+> admin 通过以下脚本完成管理操作。脚本强制 `--yes` 二次确认防误操作。
+
+#### 14.5.1 `tools/admin-reset-progress.cjs` — 重置测试进度
+
+清空所有 81 matchup 的 `completed`（保留 `target=10`），影响所有登录此网站的玩家。
+
+```bash
+# 1. 设置环境变量
+export API="https://card.example.com"
+# ADMIN_TOKEN 可选（未来若后端加鉴权则启用；当前 reset 路由不要求）
+
+# 2. 看 --help
+node tools/admin-reset-progress.cjs --help
+
+# 3. 执行重置（强制 --yes 防误触）
+node tools/admin-reset-progress.cjs --yes
+
+# 输出：
+# 📊 当前状态:
+#    总进度: 123/810
+#    已锁定: 5 / 81
+#    可用:   76 个 matchup
+#
+# 🚀 正在重置...
+# ✅ 重置成功
+```
+
+**警告**：
+- 操作不可撤销，影响所有用户
+- 缺 `--yes` 标志时拒绝执行（Exit 1）
+- 当前 reset 路由无鉴权（API 仍可被直接 curl），未来需加 ADMIN_TOKEN 校验
+
+#### 14.5.2 `tools/admin-stats.cjs` — 查看 admin 统计
+
+读取录像 + 测试进度总览。
+
+```bash
+# 1. 必填：ADMIN_TOKEN（服务器 .env 里复制）
+export ADMIN_TOKEN="<从服务器 .env 复制的 token>"
+export API="https://card.example.com"  # 可选，默认
+
+# 2. 执行
+node tools/admin-stats.cjs
+
+# 输出：
+# ━━━ 录像统计（admin） ━━━
+#    总录像:   4
+#    首条时间: 2026-06-17T13:45:12.000Z
+#    末条时间: 2026-06-18T05:48:38.000Z
+#
+#    按 char_ai × winner 分布:
+#      char_3: 玩家 1 局 (100.0%) | AI 0 局 (0.0%) | 平局 0 局
+#      char_6: 玩家 3 局 (100.0%) | AI 0 局 (0.0%) | 平局 0 局
+#
+# ━━━ 测试进度（公开） ━━━
+#    总进度: 0/810
+#    已锁定: 0 / 81
+```
+
+#### 14.5.3 完整 admin 工具链
+
+| 脚本 | 用途 | 是否需 ADMIN_TOKEN |
+|---|---|---|
+| `tools/pull_replays.cjs` | 拉取所有录像到 JSONL | ❌（当前） |
+| `tools/admin-stats.cjs` | 查看录像 + 进度统计 | ✅ |
+| `tools/admin-reset-progress.cjs` | 重置测试进度 | ❌（当前；未来加鉴权） |
+
+未来改进方向：给 reset 路由加 ADMIN_TOKEN 校验（与 admin/stats 一致）。

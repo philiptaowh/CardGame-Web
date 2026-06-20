@@ -80,6 +80,9 @@ function createPlayer(id: PlayerId, name: string, characterId: CharacterId, seat
     hand: [],
     marks: [],
     action_order_modifier: 0,
+    // v2.2.1.9 新增：跨回合生效的 action_order 修正（特殊卡 5「先手」使用）
+    // 在 resolveMarks 时复制到 action_order_modifier 后清零（参考 next_turn_damage_modifier）
+    next_turn_action_order_modifier: 0,
     damage_modifier: 0,
     heal_modifier: 0,
     penetration_modifier: 0,
@@ -401,13 +404,9 @@ export class GameEngine {
     let target = { ...this.s.players[targetIndex] };
 
     // ====== 检查睡眠 ======
-    // 睡眠跳过的玩家从未获得行动机会，按 extra_rule.md 裁定不标记 has_acted_this_turn
-    // 这样"先手"角色的技能在目标是睡眠状态时仍能触发"若该玩家还未行动"加成
+    // v2.2.1.7 重构：直接委托 skipCurrentPlayerTurn()，避免 advancePhase 错误标记 has_acted
     if (player.has_sleep) {
-      player.current_hp = Math.min(player.max_hp, player.current_hp + 2);
-      this.addLog(`${player.name} 处于睡眠状态，回复2点血量并结束行动`);
-      this.s.players = this.s.players.map(p => p.id === playerId ? player : p);
-      this.advancePhase();
+      this.skipCurrentPlayerTurn();
       return;
     }
 
@@ -542,7 +541,13 @@ export class GameEngine {
       } else if (skillIndex === 2) {
         damage = 3;
         penetration = 3;
-        if (!target.has_acted_this_turn) addMarkWithReplacement(player, '鼓舞', 1);
+        // v2.2.1.8 平衡调整：未行动目标触发时，附加 2 正 1 负印记（鼓舞 + 灵感 + 流血）
+        // 高风险高收益：灵感抽牌 + 鼓舞增伤 vs 流血每回合 -4 HP
+        if (!target.has_acted_this_turn) {
+          addMarkWithReplacement(player, '鼓舞', 1);
+          addMarkWithReplacement(player, '灵感', 1);
+          addMarkWithReplacement(player, '流血', 1);
+        }
       } else if (skillIndex === 3) {
         addMarkWithReplacement(target, '失明', 1);
         if (target.has_acted_this_turn) addMarkWithReplacement(target, '睡眠', 1);
@@ -745,7 +750,9 @@ export class GameEngine {
           return;
         }
         player.hand.pop();
-        player.action_order_modifier -= 100;
+        // v2.2.1.9 修复：写入 next_turn_action_order_modifier（跨回合生效）
+        // 原写 action_order_modifier 在 turn 末被清零，导致下一回合 phase1 已无 modifier
+        player.next_turn_action_order_modifier -= 100;
         break;
       case 6:
         this.drawCard(playerId, 2);
@@ -861,18 +868,26 @@ export class GameEngine {
       const isLastPlayer = this.s.current_player_index === this.s.players.length - 1;
       if (isLastPlayer) {
         const playerInitiatives = this.s.players.map((p, originalIndex) => ({
-          id: p.id, name: p.name, energy: p.phase1_energy, originalIndex,
+          id: p.id, name: p.name, energy: p.phase1_energy,
+          modifier: p.action_order_modifier ?? 0,  // v2.2.1.9: 读取 modifier（特殊卡 5 先手）
+          originalIndex,
         }));
-        playerInitiatives.sort((a, b) =>
-          b.energy !== a.energy ? b.energy - a.energy : a.originalIndex - b.originalIndex
-        );
+        // v2.2.1.9 修复：sort 比较链加 modifier 优先级
+        // 优先级：modifier（越负越前，先手效果）> energy > originalIndex
+        playerInitiatives.sort((a, b) => {
+          if (a.modifier !== b.modifier) return a.modifier - b.modifier;
+          if (a.energy !== b.energy) return b.energy - a.energy;
+          return a.originalIndex - b.originalIndex;
+        });
         const newActionOrder = playerInitiatives.map(pi => pi.id);
 
+        // v2.2.1.9: phase1Results 标记 usedFirstStrikeCard（弹窗显示「⚡先手」徽章）
         const phase1Results = playerInitiatives.map(pi => ({
           playerId: pi.id,
           name: pi.name,
           energy: pi.energy,
           cardCount: this.s.players.find(p => p.id === pi.id)?.phase1_cards.length ?? 0,
+          usedFirstStrikeCard: pi.modifier < 0,
         }));
         let newDiscardPile = [...this.s.discard_pile];
         const newPlayers = this.s.players.map(p => {
@@ -894,16 +909,10 @@ export class GameEngine {
           message: `行动顺序已确定`, timestamp: this.timestampProvider(),
         });
 
-        // 检查首位玩家睡眠
+        // v2.2.1.7 重构：首位玩家睡眠 → 直接委托 skipCurrentPlayerTurn()（不再内联 heal + advancePhase）
         const sleepFirst = this.s.players[firstPlayerIndex];
         if (sleepFirst.has_sleep) {
-          this.addLog(`${sleepFirst.name} 处于睡眠状态，回复2点血量并结束行动`);
-          this.s.players = this.s.players.map((p, i) =>
-            i === firstPlayerIndex
-              ? { ...p, current_hp: Math.min(p.max_hp, p.current_hp + 2) }
-              : p
-          );
-          this.advancePhase();
+          this.skipCurrentPlayerTurn();
           return;
         }
 
@@ -923,19 +932,19 @@ export class GameEngine {
         const nextPlayerId = this.s.action_order[currentActionIndexInOrder + 1];
         const nextPlayerIndex = this.s.players.findIndex(p => p.id === nextPlayerId);
 
-        // 检查下一位玩家是否处于睡眠
-        // 睡眠跳过的玩家从未获得行动机会，按 extra_rule.md 裁定不标记 has_acted_this_turn
-        // 这样"先手"角色的技能在目标是睡眠状态时仍能触发"若该玩家还未行动"加成
-        const sleepNext = this.s.players[nextPlayerIndex];
-        if (sleepNext.has_sleep) {
-          this.addLog(`${sleepNext.name} 处于睡眠状态，回复2点血量并结束行动`);
-          this.s.players = this.s.players.map((p, i) =>
-            i === nextPlayerIndex
-              ? { ...p, current_hp: Math.min(p.max_hp, p.current_hp + 2) }
-              : p
+        // v2.2.1.7 重构：下一位睡眠时，标记 current 已行动（正常结束），
+        // 然后委托 skipCurrentPlayerTurn() 处理下一位的跳过逻辑。
+        // 原实现是「heal next + 递归 advancePhase()」，会导致 next 被错误标记 has_acted，
+        // 屏蔽 char_5「先手」技能的「若该玩家还未行动」加成。
+        if (this.s.players[nextPlayerIndex].has_sleep) {
+          // 标记 current 已行动（current 是正常结束回合的）
+          this.s.players = this.s.players.map(p =>
+            p.id === currentPlayerId ? { ...p, has_acted_this_turn: true } : p
           );
+          // 推进 current_player_index 到 next (sleep 玩家)
           this.s.current_player_index = nextPlayerIndex;
-          this.advancePhase();
+          // 委托 skipCurrentPlayerTurn：内部 heal + 不标记 + 推进到再下一位 + 抽牌
+          this.skipCurrentPlayerTurn();
           return;
         }
 
@@ -953,6 +962,62 @@ export class GameEngine {
         this.endTurn();
       }
     }
+  }
+
+  // ============ 跳过当前玩家（v2.2.1.7 新增）============
+  //
+  // 专门处理「因状态无法行动 → 系统跳过」的统一逻辑。
+  // 当前触发场景：睡眠（has_sleep）。未来扩展（如冰冻、眩晕）只需在本方法内增加分支。
+  //
+  // 职责：
+  //   1. 补偿：恢复 2 HP（睡眠补偿）
+  //   2. 不标记 has_acted_this_turn（按 extra_rule.md 裁定，睡眠玩家不算"已行动"）
+  //   3. 推进到下一位；若下一位也是无法行动状态，递归跳过
+  //   4. 给下一位（非首回合）抽 2 张牌
+  //   5. 全部行动完毕 → 切换到 phase3 + endTurn
+  //
+  // 调用方：
+  //   - useSkill 中 player.has_sleep 时（原 line 410 advancePhase）
+  //   - phase1→phase2 首位玩家睡眠时（原 line 906 advancePhase）
+  //   - advancePhase NEXT-sleep 分支（原 line 938 递归 advancePhase）
+  //
+  // 与 advancePhase 的关键区别：本方法**不**标记 current 已行动，
+  // 避免 char_5「先手」角色的「若该玩家还未行动」加成被错误屏蔽。
+  skipCurrentPlayerTurn(): void {
+    const currentPlayer = this.s.players[this.s.current_player_index];
+    if (!currentPlayer) return;
+
+    // 1. 睡眠补偿：回 2 HP
+    this.s.players = this.s.players.map((p, i) =>
+      i === this.s.current_player_index
+        ? { ...p, current_hp: Math.min(p.max_hp, p.current_hp + 2) }
+        : p
+    );
+    this.addLog(`${currentPlayer.name} 处于睡眠状态，回复2点血量并结束行动`);
+
+    // 2. 找下一位（按 action_order）
+    const currentActionIndexInOrder = this.s.action_order.findIndex(id => id === currentPlayer.id);
+
+    // 全部行动完毕
+    if (currentActionIndexInOrder >= this.s.action_order.length - 1) {
+      this.s.phase = 'phase3';
+      this.s.current_player_index = 0;
+      this.endTurn();
+      return;
+    }
+
+    const nextPlayerId = this.s.action_order[currentActionIndexInOrder + 1];
+    const nextPlayerIndex = this.s.players.findIndex(p => p.id === nextPlayerId);
+    this.s.current_player_index = nextPlayerIndex;
+
+    // 3. 下一位也是睡眠？递归跳过（支持连续睡眠场景）
+    if (this.s.players[nextPlayerIndex].has_sleep) {
+      this.skipCurrentPlayerTurn();
+      return;
+    }
+
+    // 4. 给下一位（非首回合）抽 2 张牌
+    if (this.s.turn > 1) this.drawCard(nextPlayerId, 2);
   }
 
   // ============ AI 行动 ============
@@ -1069,7 +1134,10 @@ export class GameEngine {
       updatedPlayer.next_turn_damage_modifier = 0;
       updatedPlayer.next_turn_heal_modifier = 0;
       updatedPlayer.next_turn_penetration_modifier = 0;
-      updatedPlayer.action_order_modifier = 0;
+      // v2.2.1.9 修复：apply 模式 — 把跨回合 modifier 复制到当回合 modifier，再清零
+      // 原版直接清零 action_order_modifier（endTurn / resolveMarks），导致特殊卡 5 跨回合失效
+      updatedPlayer.action_order_modifier = updatedPlayer.next_turn_action_order_modifier;
+      updatedPlayer.next_turn_action_order_modifier = 0;
       updatedPlayer.took_damage_this_turn = false;
       updatedPlayer.has_acted_this_turn = false;
       updatedPlayer.skills_used_this_turn = 0;

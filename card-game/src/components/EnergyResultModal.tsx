@@ -112,6 +112,17 @@ export function EnergyResultModal() {
                       <span className={`font-medium ${isFirst ? 'text-yellow-200' : 'text-white'}`}>
                         {entry.name}
                       </span>
+                      {/* v2.2.1.9: 「⚡先手」徽章 — 特殊卡 5 跨回合生效标记 */}
+                      {entry.usedFirstStrikeCard && (
+                        <span
+                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-purple-500/20 text-purple-300 border border-purple-400/50"
+                          title="上一回合使用特殊卡 5「先手」获得本回合优先行动权"
+                          data-testid="first-strike-badge"
+                        >
+                          <Zap className="w-3 h-3" />
+                          先手
+                        </span>
+                      )}
                     </div>
 
                     {/* 能量值 */}

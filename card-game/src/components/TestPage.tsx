@@ -14,12 +14,12 @@
 //   - "随机" 按钮（从 available 中随机挑一个）
 //   - 81 项 matchup 列表，每项 10 格进度方块
 //   - 锁定项灰显 + 不可点
-//   - 重置按钮（清空所有 completed）
+//   - v2.2.1.10: 移除"重置全部进度"按钮（玩家无入口；admin 通过 tools/admin-reset-progress.cjs 重置）
 
 import { useEffect, useState, useRef } from 'react';
 import {
-  Play, RotateCcw, RefreshCw, Dices, ArrowLeft, Settings as SettingsIcon,
-  Lock, Check, AlertCircle, Loader2,
+  Play, RefreshCw, Dices, ArrowLeft, Settings as SettingsIcon,
+  Lock, Check, AlertCircle, Loader2, HardDrive,
 } from 'lucide-react';
 import {
   useTestProgressStore, getNextPending, renderProgressBlocks, type MatchupProgress,
@@ -28,6 +28,7 @@ import { useGameStore } from '../stores/gameStore';
 import { useSettingsStore } from '../stores/settingsStore';
 import { useToastStore } from '../stores/toastStore';
 import { useTutorialStore } from '../stores/tutorialStore';
+import { isWebMode } from '../config/buildMode';
 import { getCharacterById } from '../game/characters';
 
 const AI_BO_WINRATE: Record<string, number> = {
@@ -54,7 +55,7 @@ export function TestPage({ onBack, onStartGame, onOpenSettings }: TestPageProps)
   const lastSyncedAt = useTestProgressStore((s) => s.lastSyncedAt);
   const incrementMatchupAsync = useTestProgressStore((s) => s.incrementMatchupAsync);
   const selectRandomMatchupAsync = useTestProgressStore((s) => s.selectRandomMatchupAsync);
-  const resetAllAsync = useTestProgressStore((s) => s.resetAllAsync);
+  // v2.2.1.10: resetAllAsync 已从前端解构删除（玩家无入口）
   const migrateFromLocalStorage = useTestProgressStore((s) => s.migrateFromLocalStorage);
 
   const initGame = useGameStore((s) => s.initGame);
@@ -173,21 +174,11 @@ export function TestPage({ onBack, onStartGame, onOpenSettings }: TestPageProps)
     handleStart(m);
   };
 
-  const handleReset = async () => {
-    if (!confirm('清空所有 81 个 matchup 的已完成局数（保留 target=10）？\n此操作会影响所有登录此网站的玩家，不可撤销。')) {
-      return;
-    }
-    const ok = await resetAllAsync();
-    if (ok) {
-      showToast('已重置所有进度', 'info');
-    } else {
-      showToast('重置失败', 'error');
-    }
-  };
-
   const handleRefresh = async () => {
     await fetchProgress();
   };
+
+  // v2.2.1.10: handleReset 已删除（前端无重置入口；admin 用 tools/admin-reset-progress.cjs）
 
   // 排序：按 AI BO 胜率降序，同 BO 胜率按人类角色顺序
   const sortedProgress = Object.values(progress).sort((a, b) => {
@@ -247,12 +238,21 @@ export function TestPage({ onBack, onStartGame, onOpenSettings }: TestPageProps)
                 <Check className="w-3 h-3 text-green-400" />
               )}
               <span>
-                {error
-                  ? `错误: ${error}`
-                  : secondsSinceSync !== null
-                    ? `上次同步 ${secondsSinceSync}s 前`
-                    : '同步中...'}
+                {isWebMode()
+                  ? error
+                    ? `错误: ${error}`
+                    : secondsSinceSync !== null
+                      ? `上次同步 ${secondsSinceSync}s 前`
+                      : '同步中...'
+                  : null}
               </span>
+              {/* v2.2.1.11: 桌面模式显示「本地模式」徽章替代同步指示器 */}
+              {!isWebMode() && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-500/20 text-amber-300 border border-amber-400/50">
+                  <HardDrive className="w-3 h-3" />
+                  本地模式
+                </span>
+              )}
               <button
                 data-testid="test-refresh"
                 onClick={handleRefresh}
@@ -316,13 +316,7 @@ export function TestPage({ onBack, onStartGame, onOpenSettings }: TestPageProps)
         <div className="bg-slate-800/30 rounded-xl border border-slate-700 overflow-hidden">
           <div className="px-5 py-3 border-b border-slate-700 flex items-center justify-between">
             <h3 className="text-sm font-semibold text-slate-300">📋 Matchup 清单 (81 项 × 10 局 = 810 局)</h3>
-            <button
-              onClick={handleReset}
-              data-testid="test-reset"
-              className="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs rounded transition-colors flex items-center gap-1"
-            >
-              <RotateCcw className="w-3 h-3" />重置全部进度
-            </button>
+            {/* v2.2.1.10: 移除"重置全部进度"按钮（前端无重置入口；admin 用 tools/admin-reset-progress.cjs） */}
           </div>
           <div className="max-h-[50vh] overflow-y-auto">
             <table className="w-full text-sm">
@@ -396,7 +390,9 @@ export function TestPage({ onBack, onStartGame, onOpenSettings }: TestPageProps)
         </div>
 
         <p className="text-xs text-slate-500 italic mt-4 text-center">
-          提示：所有登录此网站的玩家共用此进度。每 5s 自动同步。已收满 10 局的 matchup 自动锁定。
+          {isWebMode()
+            ? '提示：所有登录此网站的玩家共用此进度。每 5s 自动同步。已收满 10 局的 matchup 自动锁定。'
+            : '📁 本地模式：进度保存在浏览器，刷新页面不丢失；不同设备进度相互隔离。'}
         </p>
       </div>
     </div>
